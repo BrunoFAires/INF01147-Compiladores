@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-I.
 DEPS = src/tokens.h include/util.h
-OBJ = src/main.c src/util/util.c src/lex.yy.c
+OBJ = src/main.o src/util/util.o src/lex.yy.o
 LIBS = -lfl
 
 %.o: %.c $(DEPS)
