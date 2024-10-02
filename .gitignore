@@ -1,3 +1,4 @@
 *.o
 etapa1/etapa1
 *.tgz
+lex.yy.c
