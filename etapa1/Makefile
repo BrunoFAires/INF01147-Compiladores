@@ -9,7 +9,7 @@ LIBS = -lfl
 _DEPS = tokens.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o utils.o lex.yy.o
+_OBJ = main.o lex.yy.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: dirs clean run
@@ -29,7 +29,7 @@ dirs:
 $(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS) | dirs
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(SRCDIR)/%.yy.c: scanner.l
+$(SRCDIR)/lex.yy.c: scanner.l
 	flex -o $@ $<
 
 clean:
