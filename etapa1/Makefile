@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-I.
-DEPS = src/tokens.h include/util.h
-OBJ = src/main.o src/util/util.o src/lex.yy.o
+DEPS = tokens.h util.h
+OBJ = main.o util.o lex.yy.o
 LIBS = -lfl
 
 %.o: %.c $(DEPS)
@@ -10,8 +10,8 @@ LIBS = -lfl
 etapa1: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-src/lex.yy.c: scanner.l
-	flex -o src/lex.yy.c scanner.l
+lex.yy.c: scanner.l
+	flex -o lex.yy.c scanner.l
 
 clean:
 	find . \( -type f -name "*.o" -o -name "etapa[0-9]" -o -name "lex.yy.c" \) -delete
