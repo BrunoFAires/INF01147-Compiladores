@@ -12,3 +12,6 @@ etapa1: $(OBJ)
 
 src/lex.yy.c: scanner.l
 	flex -o src/lex.yy.c scanner.l
+
+clean:
+	find . \( -type f -name "*.o" -o -name "etapa[0-9]" -o -name "lex.yy.c" \) -delete
