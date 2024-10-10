@@ -1,0 +1,37 @@
+int
+float
+if
+else
+while
+return
+-
+!
+*
+/
+%
++
+<
+>
+{
+}
+(
+)
+=
+,
+;
+<=
+>=
+!=
+&
+|
+
+1565.55
+150
+int teste = 150;
+batata_frita_eh_bom_demais
+_155_batatas_eh_melhor_ainda12
+//teste comentario
+int hello_world(){
+	return 010010000110010101101100011011000110111100100000011101110110111101110010011011000110010000100001;
+}
+
