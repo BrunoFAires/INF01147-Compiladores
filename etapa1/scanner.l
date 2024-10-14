@@ -20,21 +20,7 @@ else    { return TK_PR_ELSE; }
 while   { return TK_PR_WHILE; }
 return  { return TK_PR_RETURN; }
 
-"-"     { return (char) yytext[0]; }
-"!"     { return (char) yytext[0]; }
-"*"     { return (char) yytext[0]; }
-"/"     { return (char) yytext[0]; }
-"%"     { return (char) yytext[0]; }
-"+"     { return (char) yytext[0]; }
-"<"     { return (char) yytext[0]; }
-">"     { return (char) yytext[0]; }
-"{"     { return (char) yytext[0]; }
-"}"     { return (char) yytext[0]; }
-"("     { return (char) yytext[0]; }
-")"     { return (char) yytext[0]; }
-"="     { return (char) yytext[0]; }
-","     { return (char) yytext[0]; }
-";"     { return (char) yytext[0]; }
+[-!*/%+<>{}()=,;]  { return (int) yytext[0]; }
 
 "<="    { return TK_OC_LE; }
 ">="    { return TK_OC_GE; }
@@ -43,9 +29,11 @@ return  { return TK_PR_RETURN; }
 "&"    { return TK_OC_AND; }
 "|"    { return TK_OC_OR; }
 
-["_"{minusculos}]
+([a-z_]+[0-9]*)+    { return TK_IDENTIFICADOR; }
+[0-9]+              { return TK_LIT_INT; }
+[0-9]*\.[0-9]+      { return TK_LIT_FLOAT; }
 
-debugging.       { return TK_ERRO; } // any other character
+.       { return TK_ERRO; } // any other character
 
 %%
 
