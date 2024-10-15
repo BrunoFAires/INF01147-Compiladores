@@ -22,6 +22,13 @@ void yyerror (char const *mensagem);
 
 %%
 
-programa:
-
+programa: listaDeFuncao;
+listaDeFuncao: funcao listaDeFuncao | funcao
+funcao: TK_IDENTIFICADOR '=' parametrosFuncao  '>' tipoRetornoFuncao blocoComando;
+parametrosFuncao: listaParametrosFuncao | ;
+listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipoParametro | TK_IDENTIFICADOR '<''-' tipoParametro',' listaParametrosFuncao;
+tipoRetornoFuncao: TK_PR_INT | TK_PR_FLOAT;
+tipoParametro: TK_PR_INT | TK_PR_FLOAT;
+blocoComando: '{' coropoBlocoComando '}'';';
+coropoBlocoComando: blocoComando | ;
 %%
