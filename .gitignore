@@ -1,8 +1,3 @@
-# Project
-etapa1/etapa1
-etapa2/etapa2
-*.tgz
-
 # Prerequisites
 *.d
 
@@ -56,7 +51,11 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# Project
+etapa1/etapa1
+etapa2/etapa2
+*.tgz
 **/parser.tab.*
-**/lex.yy.c
+**/lex.yy.*
 **/parser.output
-etapa2/teste.txt
+**/teste.txt
