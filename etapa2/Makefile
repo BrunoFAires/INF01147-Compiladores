@@ -28,13 +28,13 @@ $(IDIR)/parser.tab.h: $(SDIR)/parser.y $(IDIR)/util.h
 	bison -d -o $(SDIR)/parser.tab.c $<
 	mv $(SDIR)/parser.tab.h $(IDIR)
 
-$(ODIR)/%.o: $(SDIR)/%.c $(DEPS) | dirs
-	$(CC) -c -o $@ $< $(CFLAGS)
-
 $(SDIR)/lex.yy.c: $(SDIR)/scanner.l $(IDIR)/parser.tab.h
 	flex -o $@ $<
 
 $(ODIR)/parser.tab.o: $(SDIR)/parser.tab.c $(IDIR)/parser.tab.h
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(ODIR)/%.o: $(SDIR)/%.c $(DEPS) | dirs
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 dirs:
