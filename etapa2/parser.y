@@ -1,3 +1,4 @@
+%define parse.error verbose
 %{
 int yylex(void);
 void yyerror (char const *mensagem);
@@ -22,13 +23,23 @@ void yyerror (char const *mensagem);
 
 %%
 
-programa: listaDeFuncao;
-listaDeFuncao: funcao listaDeFuncao | funcao
-funcao: TK_IDENTIFICADOR '=' parametrosFuncao  '>' tipoRetornoFuncao blocoComando;
-parametrosFuncao: listaParametrosFuncao | ;
-listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipoParametro | TK_IDENTIFICADOR '<''-' tipoParametro',' listaParametrosFuncao;
-tipoRetornoFuncao: TK_PR_INT | TK_PR_FLOAT;
-tipoParametro: TK_PR_INT | TK_PR_FLOAT;
-blocoComando: '{' coropoBlocoComando '}'';';
-coropoBlocoComando: blocoComando | ;
+programa: listaDeFuncao | ;
+
+listaDeFuncao: funcaoComParametros listaDeFuncao | funcaoSemParametros listaDeFuncao | funcaoComParametros | funcaoSemParametros
+funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando;
+funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando;
+
+parametrosFuncao: listaParametrosFuncao;
+listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo | TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao;
+
+tipo: TK_PR_INT | TK_PR_FLOAT;
+literal: TK_LIT_INT | TK_LIT_FLOAT
+
+blocoComando: '{' corpoBlocoComando'}'
+corpoBlocoComando: listaDeComandoSimples | ;
+comandosSimples: var | blocoComando | var comandosSimples | blocoComando comandosSimples
+listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';'
+
+var: tipo listaVar
+listaVar: TK_IDENTIFICADOR | TK_IDENTIFICADOR TK_OC_LE literal | TK_IDENTIFICADOR',' listaVar | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar
 %%

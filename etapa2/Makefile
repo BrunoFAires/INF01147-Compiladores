@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I.
+CFLAGS = -Iinclude
 LIBS = -lfl
 
 DEPS = include/util.h include/parser.tab.h
@@ -8,10 +8,11 @@ OBJ = src/main.o src/util/util.o src/lex.yy.o src/parser.tab.o
 etapa2: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-src/parser.tab.c include/parser.tab.h: parser.y include/util.h
-	bison -d -o src/parser.tab.c parser.y
+include/parser.tab.h: parser.y include/util.h
+	bison -d -o src/parser.tab.c -v parser.y
+	mv src/parser.tab.h include/
 
-src/parser.tab.o: src/parser.tab.c
+src/parser.tab.o: src/parser.tab.c include/parser.tab.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 src/main.o: src/main.c $(DEPS)

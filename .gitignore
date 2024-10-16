@@ -56,5 +56,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-etapa2/src/parser.tab.*
-etapa2/src/lex.yy.c
+**/parser.tab.*
+**/lex.yy.c
+**/parser.output
