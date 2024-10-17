@@ -1,0 +1,28 @@
+main0 = > int{
+	main0 = > int{
+	return 0
+};
+}
+
+
+main0 = > int{
+	return 0
+}
+
+main1 = > int{
+	return;
+}
+
+main2 = > int{
+	if(0){
+		return 10+25
+	};
+}
+
+main3 = > int{
+	if(0){
+		return 10+25;
+	};else{
+		return 0;
+	};
+}
