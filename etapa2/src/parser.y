@@ -1,7 +1,12 @@
+/* Analisador Sintático - Etapa 2 */
+
 %define parse.error verbose
+
 %{
+
 int yylex(void);
 void yyerror (char const *mensagem);
+
 %}
 
 %token TK_PR_INT
@@ -25,7 +30,11 @@ void yyerror (char const *mensagem);
 
 programa: listaDeFuncao | ;
 
-listaDeFuncao: funcaoComParametros listaDeFuncao | funcaoSemParametros listaDeFuncao | funcaoComParametros | funcaoSemParametros
+listaDeFuncao: funcaoComParametros listaDeFuncao 
+             |  funcaoSemParametros listaDeFuncao 
+             |  funcaoComParametros 
+             |  funcaoSemParametros
+             ;
 funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando;
 funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando;
 
@@ -33,30 +42,68 @@ parametrosFuncao: listaParametrosFuncao;
 listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo | TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao;
 
 tipo: TK_PR_INT | TK_PR_FLOAT;
-literal: TK_LIT_INT | TK_LIT_FLOAT
+literal: TK_LIT_INT | TK_LIT_FLOAT;
 
-blocoComando: '{' corpoBlocoComando '}'
+blocoComando: '{' corpoBlocoComando '}';
 corpoBlocoComando: listaDeComandoSimples | ;
-comandosSimples: var | blocoComando | var comandosSimples | blocoComando comandosSimples | condicional | repeticao;
-listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';' // talvez colocar o ';' em cada comando simples que for necessário
+comandosSimples: var 
+               | blocoComando 
+               | var comandosSimples 
+               | blocoComando comandosSimples 
+               | condicional 
+               | repeticao
+               ;
+listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';'; // talvez colocar o ';' em cada comando simples que for necessário
 
-var: tipo listaVar
-listaVar: TK_IDENTIFICADOR | TK_IDENTIFICADOR TK_OC_LE literal | TK_IDENTIFICADOR',' listaVar | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar
+var: tipo listaVar;
+listaVar: TK_IDENTIFICADOR 
+        | TK_IDENTIFICADOR TK_OC_LE literal 
+        | TK_IDENTIFICADOR',' listaVar 
+        | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar
+        ;
 
-/* Comandos de Controle de Fluxo: A linguagem
-possui uma construção condicional e uma itera-
-tiva para controle estruturado de fluxo. A con-
-dicional consiste no token if seguido de uma ex-
-pressão entre parênteses e então por um bloco de
-comandos obrigatório. O else, sendo opcional,
-deve sempre aparecer após o bloco do if, e é se-
-guido de um bloco de comandos, obrigatório caso
-o else seja empregado. Temos apenas uma cons-
-trução de repetição que é o token while seguido
-de uma expressão entre parênteses e de um bloco
-de comandos. */
+chamadaFuncao: '#'; // TODO: placeholder
 
-condicional: TK_PR_IF '(' TK_LIT_INT ')' blocoComando TK_PR_ELSE blocoComando | TK_PR_IF '(' TK_LIT_INT ')' blocoComando;
-repeticao: TK_PR_WHILE '(' TK_LIT_INT ')' blocoComando;
+condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando 
+           | TK_PR_IF '(' expressao ')' blocoComando;
+repeticao: TK_PR_WHILE '(' expressao ')' blocoComando;
+
+/* Expressões tem operandos e operadores, sendo
+este opcional. Os operandos podem ser (a) iden-
+tificadores, (b) literais e (c) chamada de função ou
+(d) outras expressões, podendo portanto ser for-
+madas recursivamente pelo emprego de operado-
+res. Elas também permitem o uso de parênteses
+para forçar uma associatividade ou precedência
+diferente daquela tradicional. A associatividade
+é à esquerda (portanto implemente recursão à es-
+querda nas regras gramaticais). Os operadores são
+os seguintes: 
+*/
+// Quanto mais embaixo, maior a precedência (mais perto das folhas da árvore de derivação)
+expressao: expressao TK_OC_OR termo
+         |  expressao TK_OC_AND termo
+         |  expressao TK_OC_NE termo
+         |  expressao TK_OC_EQ termo
+         |  expressao TK_OC_GE termo
+         |  expressao TK_OC_LE termo
+         |  expressao '>' termo
+         |  expressao '<' termo
+         |  expressao '-' termo
+         |  expressao '+' termo
+         |  termo
+         ;
+
+termo: termo '%' fator
+     |  termo '/' fator 
+     |  termo '*' fator
+     |  fator
+     ;
+
+fator: '!' fator
+     |  '-' fator
+     | '(' expressao ')'
+     | TK_IDENTIFICADOR | TK_LIT_INT | TK_LIT_FLOAT | chamadaFuncao
+     ;
 
 %%

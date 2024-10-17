@@ -1,4 +1,6 @@
 %{
+    /* Analisador Léxico - Etapa 1 */ 
+
     #include "util.h"
     #include "parser.tab.h"
 %}
