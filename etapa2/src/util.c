@@ -14,5 +14,5 @@ void increment_line_number()
 
 void yyerror(char const *mensagem)
 {
-    fprintf(stderr, "%s - %d\n", mensagem, get_line_number());
+    fprintf(stderr, "%s at line %d\n", mensagem, get_line_number());
 }

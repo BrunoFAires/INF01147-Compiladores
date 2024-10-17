@@ -3,6 +3,7 @@ CC = gcc
 CFLAGS = -I$(IDIR)
 ODIR = build
 SDIR = src
+LOGDIR = logs
 LIBS = -lfl
 
 _DEPS = util.h parser.tab.h
@@ -11,23 +12,20 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 _OBJ = main.o util.o lex.yy.o parser.tab.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-.PHONY: dirs clean run[1-7]
+.PHONY: dirs clean run
 
 etapa2: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-run2: etapa2
+run: etapa2
 	@echo Executando etapa 2...
 	./etapa2
 
-run1: etapa1
-	@echo Executando etapa 1...
-	./etapa1
-
 # Bison
 $(IDIR)/parser.tab.h: $(SDIR)/parser.y $(IDIR)/util.h
-	bison -d -o $(SDIR)/parser.tab.c $<
+	bison -d -v -o $(SDIR)/parser.tab.c $<
 	mv $(SDIR)/parser.tab.h $(IDIR)
+	mv $(SDIR)/parser.output $(LOGDIR)
 
 # Flex
 $(SDIR)/lex.yy.c: $(SDIR)/scanner.l $(IDIR)/parser.tab.h

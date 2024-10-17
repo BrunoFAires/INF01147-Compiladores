@@ -35,11 +35,28 @@ listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo | TK_IDENTIFICADOR '<''-' ti
 tipo: TK_PR_INT | TK_PR_FLOAT;
 literal: TK_LIT_INT | TK_LIT_FLOAT
 
-blocoComando: '{' corpoBlocoComando'}'
+blocoComando: '{' corpoBlocoComando '}'
 corpoBlocoComando: listaDeComandoSimples | ;
-comandosSimples: var | blocoComando | var comandosSimples | blocoComando comandosSimples
-listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';'
+comandosSimples: var | blocoComando | var comandosSimples | blocoComando comandosSimples | condicional | repeticao;
+listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';' // talvez colocar o ';' em cada comando simples que for necessário
 
 var: tipo listaVar
 listaVar: TK_IDENTIFICADOR | TK_IDENTIFICADOR TK_OC_LE literal | TK_IDENTIFICADOR',' listaVar | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar
+
+/* Comandos de Controle de Fluxo: A linguagem
+possui uma construção condicional e uma itera-
+tiva para controle estruturado de fluxo. A con-
+dicional consiste no token if seguido de uma ex-
+pressão entre parênteses e então por um bloco de
+comandos obrigatório. O else, sendo opcional,
+deve sempre aparecer após o bloco do if, e é se-
+guido de um bloco de comandos, obrigatório caso
+o else seja empregado. Temos apenas uma cons-
+trução de repetição que é o token while seguido
+de uma expressão entre parênteses e de um bloco
+de comandos. */
+
+condicional: TK_PR_IF '(' TK_LIT_INT ')' blocoComando TK_PR_ELSE blocoComando | TK_PR_IF '(' TK_LIT_INT ')' blocoComando;
+repeticao: TK_PR_WHILE '(' TK_LIT_INT ')' blocoComando;
+
 %%
