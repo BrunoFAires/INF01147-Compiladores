@@ -58,4 +58,6 @@ etapa2/etapa2
 **/parser.tab.*
 **/lex.yy.*
 **/parser.output
-**/teste.txt
+**/tests/*
+**/*.pdf
+**/*.xopp
