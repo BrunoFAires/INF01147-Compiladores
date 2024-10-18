@@ -1,41 +1,38 @@
-OK
+// OK
 main = > int { 
 	if (1) {};}
 
-NOT OK
+// NOT OK
 main = > int { 
 	if (1) {}}
 
-OK
+// OK
 main = > int { 
 	if (1) {}
 	else {};}
 
-OK	
+// OK	
 main = > int { 
 	if (1) {};
 	else {};}
-	
-	
-	IF ( cond1 ) IF ( cond2 ) statmt1
 
-OK
+// OK
 main = > int { 
 	if (1) {if (1) {};};}
 
-OK
+// OK
 main = > int 
 {
 	while (1) {};
 }
 
-NOT OK
+// NOT OK
 main = > int 
 {
 	while (1) {}
 }
 
-OK as expr
+// OK as expr
 main = > int { 
 	if (1) {if (1) {};};}
 

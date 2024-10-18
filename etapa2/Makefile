@@ -22,7 +22,7 @@ run: etapa2
 	./etapa2
 
 # Bison
-$(IDIR)/parser.tab.h: $(SDIR)/parser.y $(IDIR)/util.h
+$(IDIR)/parser.tab.h: $(SDIR)/parser.y $(IDIR)/util.h | dirs
 	bison -d -v -o $(SDIR)/parser.tab.c $<
 	mv $(SDIR)/parser.tab.h $(IDIR)
 	mv $(SDIR)/parser.output $(LOGDIR)
@@ -36,11 +36,12 @@ $(ODIR)/parser.tab.o: $(SDIR)/parser.tab.c $(IDIR)/parser.tab.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 # Gerar .o para src
-$(ODIR)/%.o: $(SDIR)/%.c $(DEPS) | dirs
+$(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 dirs:
 	mkdir -p $(ODIR)
+	mkdir -p $(LOGDIR)
 
 clean:
-	rm -rf $(ODIR)/*.o $(SDIR)/lex.yy.* $(IDIR)/lex.yy.* $(SDIR)/parser.tab.* $(IDIR)/parser.tab.* etapa[1-7]
+	rm -rf $(ODIR)/*.o $(SDIR)/lex.yy.* $(IDIR)/lex.yy.* $(SDIR)/parser.tab.* $(IDIR)/parser.tab.* $(LOGDIR)/* etapa[1-7]

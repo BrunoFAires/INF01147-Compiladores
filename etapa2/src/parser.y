@@ -53,7 +53,7 @@ comandosSimples: var
                | condicional 
                | repeticao
                ;
-listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';'; // talvez colocar o ';' em cada comando simples que for necessário
+listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';';
 
 var: tipo listaVar;
 listaVar: TK_IDENTIFICADOR 
@@ -68,18 +68,6 @@ condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
            | TK_PR_IF '(' expressao ')' blocoComando;
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando;
 
-/* Expressões tem operandos e operadores, sendo
-este opcional. Os operandos podem ser (a) iden-
-tificadores, (b) literais e (c) chamada de função ou
-(d) outras expressões, podendo portanto ser for-
-madas recursivamente pelo emprego de operado-
-res. Elas também permitem o uso de parênteses
-para forçar uma associatividade ou precedência
-diferente daquela tradicional. A associatividade
-é à esquerda (portanto implemente recursão à es-
-querda nas regras gramaticais). Os operadores são
-os seguintes: 
-*/
 // Quanto mais embaixo, maior a precedência (mais perto das folhas da árvore de derivação)
 expressao: expressao TK_OC_OR termo
          |  expressao TK_OC_AND termo
