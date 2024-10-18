@@ -44,14 +44,11 @@ listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo | TK_IDENTIFICADOR '<''-' ti
 tipo: TK_PR_INT | TK_PR_FLOAT;
 literal: TK_LIT_INT | TK_LIT_FLOAT;
 
-blocoComando: '{' corpoBlocoComandoComComandosSimples'}' | blocoComandoVazio;
-corpoBlocoComandoComComandosSimples: listaDeComandoSimples;
+blocoComando: '{' listaDeComandoSimples '}' | blocoComandoVazio;
 blocoComandoVazio: '{' '}';
 
 comandosSimples: var 
                | blocoComando 
-               | var comandosSimples 
-               | blocoComando comandosSimples 
                | condicional 
                | repeticao
                | atribuicao
@@ -69,7 +66,7 @@ listaVar: TK_IDENTIFICADOR
 
 atribuicao: TK_IDENTIFICADOR '=' expressao;
 
-chamadaFuncao: TK_IDENTIFICADOR'(' listaArgumento ')';
+chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')';
 listaArgumento: expressao | expressao',' listaArgumento;
 
 retorno: TK_PR_RETURN expressao;
