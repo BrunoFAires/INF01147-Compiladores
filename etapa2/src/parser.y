@@ -48,7 +48,6 @@ blocoComando: '{' corpoBlocoComandoComComandosSimples'}' | blocoComandoVazio;
 corpoBlocoComandoComComandosSimples: listaDeComandoSimples;
 blocoComandoVazio: '{' '}';
 
-
 comandosSimples: var 
                | blocoComando 
                | var comandosSimples 
@@ -74,8 +73,6 @@ chamadaFuncao: TK_IDENTIFICADOR'(' listaArgumento ')';
 listaArgumento: expressao | expressao',' listaArgumento;
 
 retorno: TK_PR_RETURN expressao;
-
-
 
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando 
            | TK_PR_IF '(' expressao ')' blocoComando;
@@ -108,3 +105,8 @@ fator: '!' fator
      ;
 
 %%
+
+/* TODO:
+     - verificar onde o ';' deve estar:
+          - final de bloco de comando? controle de fluxo?
+*/

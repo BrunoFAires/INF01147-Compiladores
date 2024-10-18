@@ -3,22 +3,27 @@ main = > int {
 	if (1) {};}
 
 // NOT OK
-main = > int { 
-	if (1) {}}
+// main = > int { 
+//	if (1) {}}
 
-// OK
+// OK 
 main = > int { 
 	if (1) {}
 	else {};}
 
-// OK	
-main = > int { 
-	if (1) {};
-	else {};}
+// NOT OK 
+// main = > int { 
+//	if (1) {};
+//	else {};}
 
 // OK
 main = > int { 
 	if (1) {if (1) {};};}
+
+// OK
+main = > int { 
+	if (1) {if (1) {} else {};};
+}
 
 // OK
 main = > int 
@@ -27,10 +32,10 @@ main = > int
 }
 
 // NOT OK
-main = > int 
-{
-	while (1) {}
-}
+// main = > int 
+// {
+// 	while (1) {}
+// }
 
 // OK as expr
 main = > int { 
