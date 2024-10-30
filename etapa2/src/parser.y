@@ -76,25 +76,27 @@ condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando;
 
 // Quanto mais embaixo, maior a precedência (mais perto das folhas da árvore de derivação)
-expressao: expressao TK_OC_OR termo
-         |  expressao TK_OC_AND termo
-         |  expressao TK_OC_NE termo
-         |  expressao TK_OC_EQ termo
-         |  expressao TK_OC_GE termo
-         |  expressao TK_OC_LE termo
-         |  expressao '>' termo
-         |  expressao '<' termo
-         |  expressao '-' termo
-         |  expressao '+' termo
-         |  termo
-         ;
-
+expressao: expressao TK_OC_OR exp1 | exp1;
+exp1: exp1 TK_OC_AND exp2 | exp2;
+exp2: exp2 TK_OC_NE exp3 
+    | exp2 TK_OC_EQ exp3 
+    | exp3
+    ;
+exp3: exp3 TK_OC_GE exp4 
+    | exp3 TK_OC_LE exp4 
+    | exp3 '>' exp4 
+    | exp3 '<' exp4 
+    | exp4
+    ;
+exp4: exp4 '-' termo 
+    | exp4 '+' termo 
+    | termo
+    ;
 termo: termo '%' fator
      |  termo '/' fator 
      |  termo '*' fator
      |  fator
      ;
-
 fator: '!' fator
      |  '-' fator
      | '(' expressao ')'
@@ -102,8 +104,3 @@ fator: '!' fator
      ;
 
 %%
-
-/* TODO:
-     - verificar onde o ';' deve estar:
-          - final de bloco de comando? controle de fluxo?
-*/
