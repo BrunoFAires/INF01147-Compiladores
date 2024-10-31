@@ -1,0 +1,80 @@
+// OK
+main = > int { 
+	if (1) {};}
+
+// NOT OK
+// main = > int { 
+//	if (1) {}}
+
+// OK 
+main = > int { 
+	if (1) {}
+	else {};}
+
+// NOT OK 
+// main = > int { 
+//	if (1) {};
+//	else {};}
+
+// OK
+main = > int { 
+	if (1) {if (1) {};};}
+
+// OK
+main = > int { 
+	if (1) {if (1) {} else {};};
+}
+
+// OK
+main = > int 
+{
+	while (1) {};
+}
+
+// NOT OK
+// main = > int 
+// {
+// 	while (1) {}
+// }
+
+// OK as expr
+main = > int { 
+	if (1) {if (1) {};};}
+	
+// NOT OK
+// main = > int 
+// {
+// 	{} int a;                          
+// }
+
+// NOT OK
+// main = > int
+// {
+//	int var int var;
+// }
+
+// NOT OK
+// main = > int 
+// {
+//	int var while (1) {};
+// }
+
+// OK
+main = > int
+{
+	int has_finished <= 0;
+	if (x >= 0)
+	{
+		int a <= 10;
+		while (a > 0)
+		{
+			compute(x, a, !a, a + x * x);
+		};
+	} 
+	else
+	{
+		has_finished = 1;
+	};
+
+	return 0;
+}
