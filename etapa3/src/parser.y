@@ -1,4 +1,4 @@
-/* Analisador Sintático - Etapa 2 */
+/* Analisador Sintático - Etapa 2 e 3 */
 
 %define parse.error verbose
 
@@ -6,8 +6,13 @@
 
 int yylex(void);
 void yyerror (char const *mensagem);
+extern void *arvore;
 
 %}
+
+%code requires { #include "asd.h" }
+// %union { asd_tree_t *tree; double value; };
+%define api.value.type { asd_tree_t * }
 
 %token TK_PR_INT
 %token TK_PR_FLOAT
@@ -31,10 +36,10 @@ void yyerror (char const *mensagem);
 programa: listaDeFuncao | ;
 
 listaDeFuncao: funcaoComParametros listaDeFuncao 
-             |  funcaoSemParametros listaDeFuncao 
-             |  funcaoComParametros 
-             |  funcaoSemParametros
-             ;
+|  funcaoSemParametros listaDeFuncao 
+|  funcaoComParametros 
+|  funcaoSemParametros
+;
 funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando;
 funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando;
 
@@ -48,21 +53,21 @@ blocoComando: '{' listaDeComandoSimples '}' | blocoComandoVazio;
 blocoComandoVazio: '{' '}';
 
 comandosSimples: var 
-               | blocoComando 
-               | condicional 
-               | repeticao
-               | atribuicao
-               | chamadaFuncao
-               | retorno
-               ;
+| blocoComando 
+| condicional 
+| repeticao
+| atribuicao
+| chamadaFuncao
+| retorno
+;
 listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';';
 
 var: tipo listaVar;
 listaVar: TK_IDENTIFICADOR 
-        | TK_IDENTIFICADOR TK_OC_LE literal 
-        | TK_IDENTIFICADOR',' listaVar 
-        | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar
-        ;
+| TK_IDENTIFICADOR TK_OC_LE literal 
+| TK_IDENTIFICADOR',' listaVar 
+| TK_IDENTIFICADOR TK_OC_LE literal',' listaVar
+;
 
 atribuicao: TK_IDENTIFICADOR '=' expressao;
 

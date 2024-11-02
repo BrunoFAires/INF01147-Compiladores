@@ -14,7 +14,7 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: dirs clean run
 
-etapa2: $(OBJ)
+etapa3: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 run: etapa2

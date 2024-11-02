@@ -16,3 +16,8 @@ void yyerror(char const *mensagem)
 {
     fprintf(stderr, "%s at line %d\n", mensagem, get_line_number());
 }
+
+void exporta (void *arvore) 
+{
+    return ;
+}
