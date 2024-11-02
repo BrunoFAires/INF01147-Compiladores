@@ -52,8 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Project
-etapa1/etapa1
-etapa2/etapa2
+**/etapa[1-7]
 *.tgz
 **/parser.tab.*
 **/lex.yy.*
