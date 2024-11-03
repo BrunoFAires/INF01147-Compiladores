@@ -60,3 +60,6 @@ etapa[1-7]/etapa[1-7]
 **/*.pdf
 **/*.xopp
 # **/tests/*
+
+# VS Code
+.vscode/*
