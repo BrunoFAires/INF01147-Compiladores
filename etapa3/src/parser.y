@@ -1,4 +1,4 @@
-/* Analisador Sintático - Etapa 2 e 3 */
+/* Analisador Sintático */
 
 %define parse.error verbose
 
@@ -10,30 +10,69 @@ extern void *arvore;
 
 %}
 
-%code requires { #include "asd.h" }
-// %union { asd_tree_t *tree; double value; };
-%define api.value.type { asd_tree_t * }
+%code requires { 
+    #include "asd.h" 
+    #include "lex_value.h"
+}
 
-%token TK_PR_INT
-%token TK_PR_FLOAT
-%token TK_PR_IF
-%token TK_PR_ELSE
-%token TK_PR_WHILE
-%token TK_PR_RETURN
-%token TK_OC_LE
-%token TK_OC_GE
-%token TK_OC_EQ
-%token TK_OC_NE
-%token TK_OC_AND
-%token TK_OC_OR
-%token TK_IDENTIFICADOR
-%token TK_LIT_INT
-%token TK_LIT_FLOAT
-%token TK_ERRO
+%union {
+    lex_value_t *value;
+    asd_tree_t *tree;
+}
+
+// TODO: valor para tokens além de identificador e literal??
+// Terminais 
+%token<value> TK_PR_INT
+%token<value> TK_PR_FLOAT
+%token<value> TK_PR_IF
+%token<value> TK_PR_ELSE
+%token<value> TK_PR_WHILE
+%token<value> TK_PR_RETURN
+%token<value> TK_OC_LE
+%token<value> TK_OC_GE
+%token<value> TK_OC_EQ
+%token<value> TK_OC_NE
+%token<value> TK_OC_AND
+%token<value> TK_OC_OR
+%token<value> TK_IDENTIFICADOR
+%token<value> TK_LIT_INT
+%token<value> TK_LIT_FLOAT
+%token<value> TK_ERRO
+
+// Não terminais
+%type<tree> programa
+%type<tree> listaDeFuncao
+%type<tree> funcaoComParametros
+%type<tree> funcaoSemParametros
+%type<tree> parametrosFuncao
+%type<tree> listaParametrosFuncao
+%type<tree> tipo
+%type<tree> literal
+%type<tree> blocoComando
+%type<tree> blocoComandoVazio
+%type<tree> comandosSimples
+%type<tree> listaDeComandoSimples
+%type<tree> var
+%type<tree> listaVar
+%type<tree> atribuicao
+%type<tree> chamadaFuncao
+%type<tree> listaArgumento
+%type<tree> retorno
+%type<tree> condicional
+%type<tree> repeticao
+%type<tree> expressao
+%type<tree> exp1
+%type<tree> exp2
+%type<tree> exp3
+%type<tree> exp4
+%type<tree> termo
+%type<tree> fator
 
 %%
 
-programa: listaDeFuncao | ;
+programa: listaDeFuncao { $$ = $1; }
+| /* vazio */ { $$ = NULL; }
+;
 
 listaDeFuncao: funcaoComParametros listaDeFuncao 
 |  funcaoSemParametros listaDeFuncao 

@@ -6,10 +6,10 @@ SDIR = src
 LOGDIR = logs
 LIBS = -lfl
 
-_DEPS = util.h parser.tab.h
+_DEPS = util.h parser.tab.h asd.h lex_value.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o util.o lex.yy.o parser.tab.o
+_OBJ = main.o util.o lex.yy.o parser.tab.o asd.o lex_value.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: dirs clean run
@@ -17,12 +17,13 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 etapa3: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-run: etapa2
-	@echo Executando etapa 2...
-	./etapa2
+run: etapa3
+	@echo Executando etapa 3...
+	./etapa3
 
 # Bison
-$(IDIR)/parser.tab.h: $(SDIR)/parser.y $(IDIR)/util.h | dirs
+B_DEPS = $(SDIR)/parser.y $(SDIR)/util.c $(IDIR)/util.h $(SDIR)/asd.c $(IDIR)/asd.h $(SDIR)/lex_value.c $(IDIR)/lex_value.h
+$(IDIR)/parser.tab.h: $(B_DEPS) | dirs
 	bison -d -v -o $(SDIR)/parser.tab.c $<
 	mv $(SDIR)/parser.tab.h $(IDIR)
 	mv $(SDIR)/parser.output $(LOGDIR)
