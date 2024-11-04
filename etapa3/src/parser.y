@@ -38,6 +38,7 @@ extern void *arvore;
 %token<value> TK_LIT_INT
 %token<value> TK_LIT_FLOAT
 %token<value> TK_ERRO
+%type<value> literal
 
 // Não terminais
 %type<tree> programa
@@ -47,7 +48,6 @@ extern void *arvore;
 %type<tree> parametrosFuncao
 %type<tree> listaParametrosFuncao
 %type<tree> tipo
-%type<tree> literal
 %type<tree> blocoComando
 %type<tree> blocoComandoVazio
 %type<tree> comandosSimples
@@ -86,7 +86,8 @@ parametrosFuncao: listaParametrosFuncao;
 listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo | TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao;
 
 tipo: TK_PR_INT | TK_PR_FLOAT;
-literal: TK_LIT_INT | TK_LIT_FLOAT;
+literal: TK_LIT_INT {$$ = $1;}
+| TK_LIT_FLOAT {$$ = $1;};
 
 blocoComando: '{' listaDeComandoSimples '}' | blocoComandoVazio;
 blocoComandoVazio: '{' '}';
@@ -101,11 +102,12 @@ comandosSimples: var
 ;
 listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';';
 
-var: tipo listaVar;
-listaVar: TK_IDENTIFICADOR 
-| TK_IDENTIFICADOR TK_OC_LE literal 
-| TK_IDENTIFICADOR',' listaVar 
-| TK_IDENTIFICADOR TK_OC_LE literal',' listaVar
+var: tipo listaVar { if($2 != NULL){$$ = asd_new("<="); asd_add_child($$, $2); asd_print($$);}  }
+
+listaVar: TK_IDENTIFICADOR { $$ = NULL; }
+| TK_IDENTIFICADOR TK_OC_LE literal  {$$ = asd_new($1->value); asd_add_child($$, asd_new($3->value));}
+| TK_IDENTIFICADOR',' listaVar { $$ = $3; }
+| TK_IDENTIFICADOR TK_OC_LE literal',' listaVar { $$ = asd_new($1->value); asd_add_child($$, asd_new($3->value)); asd_add_child($$, $5); }
 ;
 
 atribuicao: TK_IDENTIFICADOR '=' expressao;
@@ -113,7 +115,7 @@ atribuicao: TK_IDENTIFICADOR '=' expressao;
 chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')';
 listaArgumento: expressao | expressao',' listaArgumento;
 
-retorno: TK_PR_RETURN expressao;
+retorno: TK_PR_RETURN expressao { $$ = $2; };
 
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando 
            | TK_PR_IF '(' expressao ')' blocoComando;
