@@ -70,8 +70,8 @@ extern void *arvore;
 
 %%
 
-programa: listaDeFuncao { $$ = $1; }
-| /* vazio */ { $$ = NULL; }
+programa: listaDeFuncao { $$ = $1; arvore = $$; }
+| /* vazio */ { $$ = NULL; arvore = $$; }
 ;
 
 listaDeFuncao: funcaoComParametros listaDeFuncao 
@@ -87,10 +87,11 @@ listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo | TK_IDENTIFICADOR '<''-' ti
 
 tipo: TK_PR_INT | TK_PR_FLOAT;
 literal: TK_LIT_INT {$$ = $1;}
-| TK_LIT_FLOAT {$$ = $1;};
+| TK_LIT_FLOAT {$$ = $1;}
+;
 
 blocoComando: '{' listaDeComandoSimples '}' | blocoComandoVazio;
-blocoComandoVazio: '{' '}';
+blocoComandoVazio: '{' '}' { $$ = NULL; }; 
 
 comandosSimples: var 
 | blocoComando 
@@ -102,10 +103,10 @@ comandosSimples: var
 ;
 listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';';
 
-var: tipo listaVar { if($2 != NULL){$$ = asd_new("<="); asd_add_child($$, $2); asd_print($$);}  }
+var: tipo listaVar { if($2 != NULL){$$ = asd_new("<="); asd_add_child($$, $2); asd_print($$);} };
 
 listaVar: TK_IDENTIFICADOR { $$ = NULL; }
-| TK_IDENTIFICADOR TK_OC_LE literal  {$$ = asd_new($1->value); asd_add_child($$, asd_new($3->value));}
+| TK_IDENTIFICADOR TK_OC_LE literal  { $$ = asd_new($1->value); asd_add_child($$, asd_new($3->value)); }
 | TK_IDENTIFICADOR',' listaVar { $$ = $3; }
 | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar { $$ = asd_new($1->value); asd_add_child($$, asd_new($3->value)); asd_add_child($$, $5); }
 ;
@@ -115,10 +116,19 @@ atribuicao: TK_IDENTIFICADOR '=' expressao;
 chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')';
 listaArgumento: expressao | expressao',' listaArgumento;
 
-retorno: TK_PR_RETURN expressao { $$ = $2; };
+// O comando return tem um filho, que é uma expressão
+retorno: TK_PR_RETURN expressao { $$ = asd_new("return"); asd_add_child($$, $2); }; // { $$ = $2; };
 
+// O comando if com else opcional deve ter
+// pelo menos três filhos, um para a expressão, outro
+// para o primeiro comando quando verdade, e o úl-
+// timo – opcional – para o segundo comando quando
+// falso
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando 
-           | TK_PR_IF '(' expressao ')' blocoComando;
+             { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, $7); }
+           | TK_PR_IF '(' expressao ')' blocoComando 
+             { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); }
+           ;
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando;
 
 // Quanto mais embaixo, maior a precedência (mais perto das folhas da árvore de derivação)
