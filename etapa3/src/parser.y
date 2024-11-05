@@ -74,7 +74,7 @@ programa: listaDeFuncao { $$ = $1; }
 | /* vazio */ { $$ = NULL; }
 ;
 
-listaDeFuncao: funcaoComParametros listaDeFuncao 
+listaDeFuncao: funcaoComParametros listaDeFuncao {}
 |  funcaoSemParametros listaDeFuncao 
 |  funcaoComParametros 
 |  funcaoSemParametros
@@ -89,25 +89,28 @@ tipo: TK_PR_INT | TK_PR_FLOAT;
 literal: TK_LIT_INT {$$ = $1;}
 | TK_LIT_FLOAT {$$ = $1;};
 
-blocoComando: '{' listaDeComandoSimples '}' | blocoComandoVazio;
-blocoComandoVazio: '{' '}';
+blocoComando: '{' listaDeComandoSimples '}'  { $$ = NULL;}; //Ver se nao deveria ser $$ = $2
+| blocoComandoVazio { $$ = NULL;};
 
-comandosSimples: var 
-| blocoComando 
-| condicional 
-| repeticao
-| atribuicao
-| chamadaFuncao
-| retorno
+blocoComandoVazio: '{' '}' { $$ = NULL;};
+
+comandosSimples: var {$$ = $1;}
+| blocoComando {$$ = $1;}
+| condicional {$$ = $1;}
+| repeticao {$$ = $1;}
+| atribuicao {$$ = $1;}
+| chamadaFuncao {$$ = $1;}
+| retorno {$$ = $1;}
 ;
-listaDeComandoSimples: comandosSimples';' listaDeComandoSimples | comandosSimples';';
+listaDeComandoSimples: comandosSimples';' listaDeComandoSimples {asd_add_child($1, $3); ; asd_print_graphviz($$); asd_free($$);};
+| comandosSimples';' {$$ = $1; };
 
-var: tipo listaVar { if($2 != NULL){$$ = asd_new("<="); asd_add_child($$, $2); asd_print($$);}  }
+var: tipo listaVar { $$ = $2; asd_print($$); asd_print_graphviz($$); asd_free($$);}
 
 listaVar: TK_IDENTIFICADOR { $$ = NULL; }
-| TK_IDENTIFICADOR TK_OC_LE literal  {$$ = asd_new($1->value); asd_add_child($$, asd_new($3->value));}
+| TK_IDENTIFICADOR TK_OC_LE literal  { $$ = asd_new("<="); asd_add_child($$, asd_new($2->value)); asd_add_child($$, asd_new($3->value)); }
 | TK_IDENTIFICADOR',' listaVar { $$ = $3; }
-| TK_IDENTIFICADOR TK_OC_LE literal',' listaVar { $$ = asd_new($1->value); asd_add_child($$, asd_new($3->value)); asd_add_child($$, $5); }
+| TK_IDENTIFICADOR TK_OC_LE literal',' listaVar {  $$ = asd_new("<="); asd_add_child($$, asd_new($2->value)); asd_add_child($$, asd_new($3->value));  asd_add_child($$, $5);}
 ;
 
 atribuicao: TK_IDENTIFICADOR '=' expressao;
