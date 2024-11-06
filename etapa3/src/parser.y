@@ -2,6 +2,7 @@
 
 %define parse.error verbose
 
+
 %{
 
 int yylex(void);
@@ -11,6 +12,7 @@ extern void *arvore;
 %}
 
 %code requires { 
+    #include "util.h"
     #include "asd.h" 
     #include "lex_value.h"
 }
@@ -69,30 +71,31 @@ extern void *arvore;
 
 %%
 
-programa: listaDeFuncao { $$ = $1; arvore = $$; }
+programa: listaDeFuncao { $$ = $1; arvore = $$; asd_print($$); asd_print_graphviz($$); asd_free($$);}
 | /* vazio */ { $$ = NULL; arvore = $$; }
 ;
 
-listaDeFuncao: funcaoComParametros listaDeFuncao {}
-|  funcaoSemParametros listaDeFuncao 
-|  funcaoComParametros 
-|  funcaoSemParametros
+listaDeFuncao: funcaoComParametros listaDeFuncao {$$ = $1; asd_add_child($$, $2);}
+|  funcaoSemParametros listaDeFuncao {$$ = $1; asd_add_child($$, $2);}
+|  funcaoComParametros {$$ = $1;}
+|  funcaoSemParametros {$$ = $1;}
 ;
-funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando;
-funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando;
+funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando {$$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $6);}
+funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando  {$$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $5);}
 
 parametrosFuncao: listaParametrosFuncao;
 listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo | TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao;
 
 tipo: TK_PR_INT | TK_PR_FLOAT;
+
 literal: TK_LIT_INT {$$ = $1;}
 | TK_LIT_FLOAT {$$ = $1;}
 ;
 
-blocoComando: '{' listaDeComandoSimples '}'  { $$ = $2;  asd_print($$); asd_print_graphviz($$); asd_free($$);}; //Ver se nao deveria ser $$ = $2
-| blocoComandoVazio { $$ = NULL;};
+blocoComando: '{' listaDeComandoSimples '}'  { $$ = $2;}; //Ver se nao deveria ser $$ = $2
+| blocoComandoVazio //Todo acho que foi removido dos dos tipos acima. Acredito que tenha que voltar pois todas as produções devem gerar algo.
 
-blocoComandoVazio: '{' '}' { $$ = NULL;};
+blocoComandoVazio: '{' '}'  //Todo acho que foi removido dos dos tipos acima. Acredito que tenha que voltar pois todas as produções devem gerar algo.
 
 comandosSimples: var {$$ = $1;}
 | blocoComando {$$ = $1;}
@@ -102,6 +105,7 @@ comandosSimples: var {$$ = $1;}
 | chamadaFuncao {$$ = $1;}
 | retorno {$$ = $1;}
 ;
+
 listaDeComandoSimples: comandosSimples';' listaDeComandoSimples {$$ = $1; asd_add_child($$, $3);};
 | comandosSimples';' {$$ = $1;};
 
@@ -140,26 +144,30 @@ repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
          ;
 
 // Quanto mais embaixo, maior a precedência (mais perto das folhas da árvore de derivação)
-expressao: expressao TK_OC_OR exp1 | exp1;
-exp1: exp1 TK_OC_AND exp2 | exp2;
-exp2: exp2 TK_OC_NE exp3 
-    | exp2 TK_OC_EQ exp3 
-    | exp3
+expressao: expressao TK_OC_OR exp1 {$$ = asd_new("|"); asd_add_child($$, $1); asd_add_child($$, $3);} 
+    | exp1 {$$ = $1;}
+exp1: exp1 TK_OC_AND exp2 {$$ = asd_new("&"); asd_add_child($$, $1); asd_add_child($$, $3);} 
+    | exp2 {$$ = $1;}
+
+
+exp2: exp2 TK_OC_NE exp3 {$$ = asd_new("!="); asd_add_child($$, $1); asd_add_child($$, $3);}
+    | exp2 TK_OC_EQ exp3  {$$ = asd_new("=="); asd_add_child($$, $1); asd_add_child($$, $3);}
+    | exp3 {$$ = $1;}
     ;
-exp3: exp3 TK_OC_GE exp4 
-    | exp3 TK_OC_LE exp4 
-    | exp3 '>' exp4 
-    | exp3 '<' exp4 
-    | exp4
+exp3: exp3 TK_OC_GE exp4 {$$ = asd_new(">="); asd_add_child($$, $1); asd_add_child($$, $3);}
+    | exp3 TK_OC_LE exp4 {$$ = asd_new("<="); asd_add_child($$, $1); asd_add_child($$, $3);}
+    | exp3 '>' exp4 {$$ = asd_new(">"); asd_add_child($$, $1); asd_add_child($$, $3);}
+    | exp3 '<' exp4 {$$ = asd_new("<"); asd_add_child($$, $1); asd_add_child($$, $3);}
+    | exp4 {$$ = $1;}
     ;
-exp4: exp4 '-' termo 
-    | exp4 '+' termo 
-    | termo
+exp4: exp4 '-' termo {$$ = asd_new("-"); asd_add_child($$, $1); asd_add_child($$, $3);}
+    | exp4 '+' termo {$$ = asd_new("+"); asd_add_child($$, $1); asd_add_child($$, $3);}
+    | termo {$$ = $1;}
     ;
-termo: termo '%' fator
-     |  termo '/' fator 
-     |  termo '*' fator
-     |  fator
+termo: termo '%' fator {$$ = asd_new("%"); asd_add_child($$, $1); asd_add_child($$, $3);}
+     |  termo '/' fator {$$ = asd_new("/"); asd_add_child($$, $1); asd_add_child($$, $3);}
+     |  termo '*' fator {$$ = asd_new("*"); asd_add_child($$, $1); asd_add_child($$, $3);}
+     |  fator {$$ = $1;}
      ;
 fator: '!' fator {$$ = asd_new("-"); asd_add_child($$, $2);}
      |  '-' fator {$$ = asd_new("-"); asd_add_child($$, $2);}
