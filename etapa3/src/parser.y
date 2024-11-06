@@ -49,7 +49,7 @@ extern void *arvore;
 %type<tree> funcaoSemParametros
 %type<tree> parametrosFuncao
 %type<tree> listaParametrosFuncao
-%type<tree> tipo
+// %type<tree> tipo TODO devemos especificar um tipo?
 %type<tree> blocoComando
 %type<tree> comandosSimples
 %type<tree> listaDeComandoSimples
@@ -71,111 +71,113 @@ extern void *arvore;
 
 %%
 
-programa: listaDeFuncao { $$ = $1; arvore = $$; asd_print($$); asd_print_graphviz($$); asd_free($$);}
+programa: listaDeFuncao { $$ = $1; arvore = $$; asd_print($$); asd_print_graphviz($$); asd_free($$); }
 | /* vazio */ { $$ = NULL; arvore = $$; }
 ;
 
-listaDeFuncao: funcaoComParametros listaDeFuncao {$$ = $1; asd_add_child($$, $2);}
-|  funcaoSemParametros listaDeFuncao {$$ = $1; asd_add_child($$, $2);}
-|  funcaoComParametros {$$ = $1;}
-|  funcaoSemParametros {$$ = $1;}
+listaDeFuncao: funcaoComParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2); }
+|  funcaoSemParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2); }
+|  funcaoComParametros { $$ = $1; }
+|  funcaoSemParametros { $$ = $1; }
 ;
-funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando {$$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $6);}
-funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando  {$$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $5);}
+funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando 
+                     { $$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $6); };
+funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando  
+                     { $$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $5); };
 
-parametrosFuncao: listaParametrosFuncao;
-listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo | TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao;
+tipo: TK_PR_INT | TK_PR_FLOAT // { $$ = NULL; }; // TODO devemos especificar uma ação?
 
-tipo: TK_PR_INT | TK_PR_FLOAT;
-
-literal: TK_LIT_INT {$$ = $1;}
-| TK_LIT_FLOAT {$$ = $1;}
-;
-
-blocoComando: '{' listaDeComandoSimples '}'  { $$ = $2;}; //Ver se nao deveria ser $$ = $2
-| blocoComandoVazio //Todo acho que foi removido dos dos tipos acima. Acredito que tenha que voltar pois todas as produções devem gerar algo.
-
-blocoComandoVazio: '{' '}'  //Todo acho que foi removido dos dos tipos acima. Acredito que tenha que voltar pois todas as produções devem gerar algo.
-
-comandosSimples: var {$$ = $1;}
-| blocoComando {$$ = $1;}
-| condicional {$$ = $1;}
-| repeticao {$$ = $1;}
-| atribuicao {$$ = $1;}
-| chamadaFuncao {$$ = $1;}
-| retorno {$$ = $1;}
+// TODO: deve constar na AST? não achei notação sobre, mas não sei se é pq to cego de sono
+parametrosFuncao: listaParametrosFuncao { $$ = NULL; };
+listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo {  $$ = NULL; }
+| TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao { $$ = NULL; }
 ;
 
-listaDeComandoSimples: comandosSimples';' listaDeComandoSimples {$$ = $1; asd_add_child($$, $3);};
-| comandosSimples';' {$$ = $1;};
-
-var: tipo listaVar { $$ = $2;}
-
-listaVar: TK_IDENTIFICADOR { $$ = NULL; }
-| TK_IDENTIFICADOR TK_OC_LE literal  { $$ = asd_new("<="); asd_add_child($$, asd_new($2->value)); asd_add_child($$, asd_new($3->value)); }
-| TK_IDENTIFICADOR',' listaVar { $$ = $3; }
-| TK_IDENTIFICADOR TK_OC_LE literal',' listaVar { $$ = asd_new("<="); asd_add_child($$, asd_new($2->value)); asd_add_child($$, asd_new($3->value));  asd_add_child($$, $5);}
+literal: TK_LIT_INT { $$ = $1; }
+| TK_LIT_FLOAT { $$ = $1; }
 ;
 
-atribuicao: TK_IDENTIFICADOR '=' expressao {$$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3);};
+blocoComando: '{' listaDeComandoSimples '}'  { $$ = $2; } 
+| '{' /* vazio */ '}' { $$ = NULL; } // Não gera AST 
+;
 
-chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')';
-listaArgumento: expressao | expressao',' listaArgumento;
+// blocoComandoVazio: '{' '}'  //Todo acho que foi removido dos dos tipos acima. Acredito que tenha que voltar pois todas as produções devem gerar algo.
+                            // Sim, na verdade isso bugou com um merge q eu dei. Eu tinha removido essa produção e juntado com a anterior pra simplificar um pouco
 
-// O comando return tem um filho, que é uma expressão
+comandosSimples: var { $$ = $1; }
+| blocoComando { $$ = $1; }
+| condicional { $$ = $1; }
+| repeticao { $$ = $1; }
+| atribuicao { $$ = $1; }
+| chamadaFuncao { $$ = $1; }
+| retorno { $$ = $1; }
+;
+
+listaDeComandoSimples: comandosSimples';' listaDeComandoSimples { $$ = $1; asd_add_child($$, $3); }
+| comandosSimples';' { $$ = $1; }
+;
+
+var: tipo listaVar { $$ = $2; };
+
+listaVar: TK_IDENTIFICADOR { $$ = NULL; } // Não gera AST
+| TK_IDENTIFICADOR TK_OC_LE literal  
+{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); } // TODO $1 em vez de $2?
+| TK_IDENTIFICADOR',' listaVar 
+{ $$ = $3; }
+| TK_IDENTIFICADOR TK_OC_LE literal',' listaVar 
+{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); asd_add_child($$, $5); }
+;
+
+atribuicao: TK_IDENTIFICADOR '=' expressao 
+{ $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3); };
+
+chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')' { $$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $3); };
+listaArgumento: expressao { $$ = $1; } 
+| expressao',' listaArgumento { $$ = $1; asd_add_child($$, $3); }
+;
+
 retorno: TK_PR_RETURN expressao { $$ = asd_new("return"); asd_add_child($$, $2); };
 
-// O comando if com else opcional deve ter
-// pelo menos três filhos, um para a expressão, outro
-// para o primeiro comando quando verdade, e o úl-
-// timo – opcional – para o segundo comando quando
-// falso
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
              { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, $7); }
            | TK_PR_IF '(' expressao ')' blocoComando
              { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, NULL); }
            ;
 
-/* O comando while deve ter pelo menos dois
-filhos, um para expressão e outro para o primeiro
-comando do laço. */
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
-           { $$ = asd_new("while"); asd_add_child($$, $3); asd_add_child($$, $5); }
-         ;
+           { $$ = asd_new("while"); asd_add_child($$, $3); asd_add_child($$, $5); };
 
 // Quanto mais embaixo, maior a precedência (mais perto das folhas da árvore de derivação)
-expressao: expressao TK_OC_OR exp1 {$$ = asd_new("|"); asd_add_child($$, $1); asd_add_child($$, $3);} 
-    | exp1 {$$ = $1;}
-exp1: exp1 TK_OC_AND exp2 {$$ = asd_new("&"); asd_add_child($$, $1); asd_add_child($$, $3);} 
-    | exp2 {$$ = $1;}
-
-
-exp2: exp2 TK_OC_NE exp3 {$$ = asd_new("!="); asd_add_child($$, $1); asd_add_child($$, $3);}
-    | exp2 TK_OC_EQ exp3  {$$ = asd_new("=="); asd_add_child($$, $1); asd_add_child($$, $3);}
-    | exp3 {$$ = $1;}
+expressao: expressao TK_OC_OR exp1 { $$ = asd_new("|"); asd_add_child($$, $1); asd_add_child($$, $3); } 
+    | exp1 { $$ = $1; }
+exp1: exp1 TK_OC_AND exp2 { $$ = asd_new("&"); asd_add_child($$, $1); asd_add_child($$, $3); } 
+    | exp2 { $$ = $1; }
+exp2: exp2 TK_OC_NE exp3 { $$ = asd_new("!="); asd_add_child($$, $1); asd_add_child($$, $3); }
+    | exp2 TK_OC_EQ exp3 { $$ = asd_new("=="); asd_add_child($$, $1); asd_add_child($$, $3); }
+    | exp3 { $$ = $1; }
     ;
-exp3: exp3 TK_OC_GE exp4 {$$ = asd_new(">="); asd_add_child($$, $1); asd_add_child($$, $3);}
-    | exp3 TK_OC_LE exp4 {$$ = asd_new("<="); asd_add_child($$, $1); asd_add_child($$, $3);}
-    | exp3 '>' exp4 {$$ = asd_new(">"); asd_add_child($$, $1); asd_add_child($$, $3);}
-    | exp3 '<' exp4 {$$ = asd_new("<"); asd_add_child($$, $1); asd_add_child($$, $3);}
-    | exp4 {$$ = $1;}
+exp3: exp3 TK_OC_GE exp4 { $$ = asd_new(">="); asd_add_child($$, $1); asd_add_child($$, $3); }
+    | exp3 TK_OC_LE exp4 { $$ = asd_new("<="); asd_add_child($$, $1); asd_add_child($$, $3); }
+    | exp3 '>' exp4 { $$ = asd_new(">"); asd_add_child($$, $1); asd_add_child($$, $3); }
+    | exp3 '<' exp4 { $$ = asd_new("<"); asd_add_child($$, $1); asd_add_child($$, $3); }
+    | exp4 { $$ = $1; }
     ;
-exp4: exp4 '-' termo {$$ = asd_new("-"); asd_add_child($$, $1); asd_add_child($$, $3);}
-    | exp4 '+' termo {$$ = asd_new("+"); asd_add_child($$, $1); asd_add_child($$, $3);}
-    | termo {$$ = $1;}
+exp4: exp4 '-' termo { $$ = asd_new("-"); asd_add_child($$, $1); asd_add_child($$, $3); }
+    | exp4 '+' termo { $$ = asd_new("+"); asd_add_child($$, $1); asd_add_child($$, $3); }
+    | termo { $$ = $1; }
     ;
-termo: termo '%' fator {$$ = asd_new("%"); asd_add_child($$, $1); asd_add_child($$, $3);}
-     |  termo '/' fator {$$ = asd_new("/"); asd_add_child($$, $1); asd_add_child($$, $3);}
-     |  termo '*' fator {$$ = asd_new("*"); asd_add_child($$, $1); asd_add_child($$, $3);}
+termo:  termo '%' fator { $$ = asd_new("%"); asd_add_child($$, $1); asd_add_child($$, $3); }
+     |  termo '/' fator { $$ = asd_new("/"); asd_add_child($$, $1); asd_add_child($$, $3); }
+     |  termo '*' fator { $$ = asd_new("*"); asd_add_child($$, $1); asd_add_child($$, $3); }
      |  fator {$$ = $1;}
      ;
-fator: '!' fator {$$ = asd_new("-"); asd_add_child($$, $2);}
-     |  '-' fator {$$ = asd_new("-"); asd_add_child($$, $2);}
-     | '(' expressao ')' {$$ = $2;}
-     | TK_IDENTIFICADOR {$$ = asd_new($1->value);};
-     | TK_LIT_INT {$$ = asd_new($1->value);};
-     | TK_LIT_FLOAT {$$ = asd_new($1->value);};
-     | chamadaFuncao {$$ = $1;};
+fator: '!' fator { $$ = asd_new("!"); asd_add_child($$, $2); }
+     | '-' fator { $$ = asd_new("-"); asd_add_child($$, $2); }
+     | '(' expressao ')' { $$ = $2; }
+     | TK_IDENTIFICADOR { $$ = asd_new($1->value); }
+     | TK_LIT_INT { $$ = asd_new($1->value); }
+     | TK_LIT_FLOAT { $$ = asd_new($1->value); }
+     | chamadaFuncao { $$ = $1; }
      ;
 
 %%
