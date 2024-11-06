@@ -49,7 +49,6 @@ extern void *arvore;
 %type<tree> listaParametrosFuncao
 %type<tree> tipo
 %type<tree> blocoComando
-%type<tree> blocoComandoVazio
 %type<tree> comandosSimples
 %type<tree> listaDeComandoSimples
 %type<tree> var
@@ -90,10 +89,9 @@ literal: TK_LIT_INT {$$ = $1;}
 | TK_LIT_FLOAT {$$ = $1;}
 ;
 
-blocoComando: '{' listaDeComandoSimples '}'  { $$ = NULL;}; //Ver se nao deveria ser $$ = $2
-| blocoComandoVazio { $$ = NULL;};
-
-blocoComandoVazio: '{' '}' { $$ = NULL;};
+blocoComando: '{' listaDeComandoSimples '}' { $$ = NULL;}; //Ver se nao deveria ser $$ = $2
+| '{' /* vazio */ '}' { $$ = NULL;}
+;
 
 comandosSimples: var {$$ = $1;}
 | blocoComando {$$ = $1;}
@@ -111,7 +109,7 @@ var: tipo listaVar { $$ = $2; asd_print($$); asd_print_graphviz($$); asd_free($$
 listaVar: TK_IDENTIFICADOR { $$ = NULL; }
 | TK_IDENTIFICADOR TK_OC_LE literal  { $$ = asd_new("<="); asd_add_child($$, asd_new($2->value)); asd_add_child($$, asd_new($3->value)); }
 | TK_IDENTIFICADOR',' listaVar { $$ = $3; }
-| TK_IDENTIFICADOR TK_OC_LE literal',' listaVar {  $$ = asd_new("<="); asd_add_child($$, asd_new($2->value)); asd_add_child($$, asd_new($3->value));  asd_add_child($$, $5);}
+| TK_IDENTIFICADOR TK_OC_LE literal',' listaVar { $$ = asd_new("<="); asd_add_child($$, asd_new($2->value)); asd_add_child($$, asd_new($3->value));  asd_add_child($$, $5);}
 ;
 
 atribuicao: TK_IDENTIFICADOR '=' expressao;
@@ -120,7 +118,7 @@ chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')';
 listaArgumento: expressao | expressao',' listaArgumento;
 
 // O comando return tem um filho, que é uma expressão
-retorno: TK_PR_RETURN expressao { $$ = asd_new("return"); asd_add_child($$, $2); }; // { $$ = $2; };
+retorno: TK_PR_RETURN expressao { $$ = asd_new("return"); asd_add_child($$, $2); };
 
 // O comando if com else opcional deve ter
 // pelo menos três filhos, um para a expressão, outro
@@ -130,9 +128,15 @@ retorno: TK_PR_RETURN expressao { $$ = asd_new("return"); asd_add_child($$, $2);
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando 
              { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, $7); }
            | TK_PR_IF '(' expressao ')' blocoComando 
-             { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); }
+             { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, NULL); }
            ;
-repeticao: TK_PR_WHILE '(' expressao ')' blocoComando;
+
+/* O comando while deve ter pelo menos dois
+filhos, um para expressão e outro para o primeiro
+comando do laço. */
+repeticao: TK_PR_WHILE '(' expressao ')' blocoComando 
+           { $$ = asd_new("while"); asd_add_child($$, $3); asd_add_child($$, $5); }
+         ;
 
 // Quanto mais embaixo, maior a precedência (mais perto das folhas da árvore de derivação)
 expressao: expressao TK_OC_OR exp1 | exp1;
@@ -156,10 +160,13 @@ termo: termo '%' fator
      |  termo '*' fator
      |  fator
      ;
-fator: '!' fator
-     |  '-' fator
-     | '(' expressao ')'
-     | TK_IDENTIFICADOR | TK_LIT_INT | TK_LIT_FLOAT | chamadaFuncao
+fator: '!' fator { $$ = asd_new("!"); asd_add_child($$, $2); }
+     |  '-' fator { $$ = asd_new("-"); asd_add_child($$, $2); }  
+     | '(' expressao ')' { $$ = $2; }
+     | TK_IDENTIFICADOR 
+     | TK_LIT_INT 
+     | TK_LIT_FLOAT 
+     | chamadaFuncao
      ;
 
 %%
