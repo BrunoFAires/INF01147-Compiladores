@@ -89,9 +89,10 @@ literal: TK_LIT_INT {$$ = $1;}
 | TK_LIT_FLOAT {$$ = $1;}
 ;
 
-blocoComando: '{' listaDeComandoSimples '}' { $$ = NULL;}; //Ver se nao deveria ser $$ = $2
-| '{' /* vazio */ '}' { $$ = NULL;}
-;
+blocoComando: '{' listaDeComandoSimples '}'  { $$ = $2;  asd_print($$); asd_print_graphviz($$); asd_free($$);}; //Ver se nao deveria ser $$ = $2
+| blocoComandoVazio { $$ = NULL;};
+
+blocoComandoVazio: '{' '}' { $$ = NULL;};
 
 comandosSimples: var {$$ = $1;}
 | blocoComando {$$ = $1;}
@@ -101,10 +102,10 @@ comandosSimples: var {$$ = $1;}
 | chamadaFuncao {$$ = $1;}
 | retorno {$$ = $1;}
 ;
-listaDeComandoSimples: comandosSimples';' listaDeComandoSimples {asd_add_child($1, $3); ; asd_print_graphviz($$); asd_free($$);};
-| comandosSimples';' {$$ = $1; };
+listaDeComandoSimples: comandosSimples';' listaDeComandoSimples {$$ = $1; asd_add_child($$, $3);};
+| comandosSimples';' {$$ = $1;};
 
-var: tipo listaVar { $$ = $2; asd_print($$); asd_print_graphviz($$); asd_free($$);}
+var: tipo listaVar { $$ = $2;}
 
 listaVar: TK_IDENTIFICADOR { $$ = NULL; }
 | TK_IDENTIFICADOR TK_OC_LE literal  { $$ = asd_new("<="); asd_add_child($$, asd_new($2->value)); asd_add_child($$, asd_new($3->value)); }
@@ -112,7 +113,7 @@ listaVar: TK_IDENTIFICADOR { $$ = NULL; }
 | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar { $$ = asd_new("<="); asd_add_child($$, asd_new($2->value)); asd_add_child($$, asd_new($3->value));  asd_add_child($$, $5);}
 ;
 
-atribuicao: TK_IDENTIFICADOR '=' expressao;
+atribuicao: TK_IDENTIFICADOR '=' expressao {$$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3);};
 
 chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')';
 listaArgumento: expressao | expressao',' listaArgumento;
@@ -125,16 +126,16 @@ retorno: TK_PR_RETURN expressao { $$ = asd_new("return"); asd_add_child($$, $2);
 // para o primeiro comando quando verdade, e o úl-
 // timo – opcional – para o segundo comando quando
 // falso
-condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando 
+condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
              { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, $7); }
-           | TK_PR_IF '(' expressao ')' blocoComando 
+           | TK_PR_IF '(' expressao ')' blocoComando
              { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, NULL); }
            ;
 
 /* O comando while deve ter pelo menos dois
 filhos, um para expressão e outro para o primeiro
 comando do laço. */
-repeticao: TK_PR_WHILE '(' expressao ')' blocoComando 
+repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
            { $$ = asd_new("while"); asd_add_child($$, $3); asd_add_child($$, $5); }
          ;
 
@@ -160,13 +161,13 @@ termo: termo '%' fator
      |  termo '*' fator
      |  fator
      ;
-fator: '!' fator { $$ = asd_new("!"); asd_add_child($$, $2); }
-     |  '-' fator { $$ = asd_new("-"); asd_add_child($$, $2); }  
-     | '(' expressao ')' { $$ = $2; }
-     | TK_IDENTIFICADOR 
-     | TK_LIT_INT 
-     | TK_LIT_FLOAT 
-     | chamadaFuncao
+fator: '!' fator {$$ = asd_new("-"); asd_add_child($$, $2);}
+     |  '-' fator {$$ = asd_new("-"); asd_add_child($$, $2);}
+     | '(' expressao ')' {$$ = $2;}
+     | TK_IDENTIFICADOR {$$ = asd_new($1->value);};
+     | TK_LIT_INT {$$ = asd_new($1->value);};
+     | TK_LIT_FLOAT {$$ = asd_new($1->value);};
+     | chamadaFuncao {$$ = $1;};
      ;
 
 %%
