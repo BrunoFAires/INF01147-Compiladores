@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "util.h"
+#include "asd.h"
 
 #define CALL "call"
 
@@ -23,7 +25,18 @@ void yyerror(char const *mensagem)
 
 void exporta(void *arvore)
 {
-    // Implementação futura
+    if (arvore == NULL) {
+        return;
+    }
+    
+    asd_tree_t *tree = (asd_tree_t *) arvore;
+    fprintf(stdout, "%p [label=\"%s\"]; \n", tree, tree->label);
+    
+    int i = 0;
+    for (i = 0; i < tree->number_of_children; i++) {
+        exporta(tree->children[i]);
+    }
+
     return;
 }
 

@@ -71,7 +71,7 @@ extern void *arvore;
 
 %%
 
-programa: listaDeFuncao { $$ = $1; arvore = $$; asd_print($$); asd_print_graphviz($$); asd_free($$); }
+programa: listaDeFuncao { $$ = $1; arvore = $$; asd_print_graphviz(arvore); /* asd_print($$); asd_print_graphviz($$); asd_free($$); */ }
 | /* vazio */ { $$ = NULL; arvore = $$; }
 ;
 
