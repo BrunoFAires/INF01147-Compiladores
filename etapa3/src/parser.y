@@ -79,9 +79,9 @@ listaDeFuncao: funcaoComParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2
 |  funcaoSemParametros { $$ = $1; }
 ;
 funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando 
-                     { $$ = asd_new($1->value); asd_add_child($$, $6); };
+                     { $$ = asd_new($1->value); if($6 != NULL) asd_add_child($$, $6); };
 funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando  
-                     { $$ = asd_new($1->value); asd_add_child($$, $5); };
+                     { $$ = asd_new($1->value); if($5 != NULL) asd_add_child($$, $5); };
 
 tipo: TK_PR_INT | TK_PR_FLOAT { $$ = NULL; }; // TODO devemos especificar uma ação?
 
@@ -108,7 +108,7 @@ comandosSimples: var { $$ = $1; }
 | retorno { $$ = $1; }
 ;
 
-listaDeComandoSimples: comandosSimples';' listaDeComandoSimples { $$ = $1; asd_add_child($$, $3); }
+listaDeComandoSimples: comandosSimples';' listaDeComandoSimples { $$ = $1; if($$ != NULL) asd_add_child($$, $3); else $$ = $3; }
 | comandosSimples';' { $$ = $1; }
 ;
 
@@ -116,17 +116,17 @@ var: tipo listaVar { $$ = $2; };
 
 listaVar: TK_IDENTIFICADOR { $$ = NULL; } // Não gera AST
 | TK_IDENTIFICADOR TK_OC_LE literal  
-{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); } // TODO $1 em vez de $2?
+{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); }
 | TK_IDENTIFICADOR',' listaVar 
 { $$ = $3; }
 | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar 
-{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); asd_add_child($$, $5); }
+{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); if($5 != NULL)asd_add_child($$, $5); }
 ;
 
 atribuicao: TK_IDENTIFICADOR '=' expressao 
 { $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3); };
 
-chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')' { $$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $3); };
+chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')' { char *str_call_funcao = call_funcao($1->value); $$ = asd_new(str_call_funcao); asd_add_child($$, $3); free(str_call_funcao); };
 listaArgumento: expressao { $$ = $1; } 
 | expressao',' listaArgumento { $$ = $1; asd_add_child($$, $3); }
 ;
