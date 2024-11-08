@@ -23,7 +23,6 @@ extern void *arvore;
 }
 
 // TODO: valor para tokens além de identificador e literal??
-// Terminais 
 %token<value> TK_PR_INT
 %token<value> TK_PR_FLOAT
 %token<value> TK_PR_IF
@@ -41,15 +40,14 @@ extern void *arvore;
 %token<value> TK_LIT_FLOAT
 %token<value> TK_ERRO
 %type<value> literal
+%type<value> tipo
 
-// Não terminais
 %type<tree> programa
 %type<tree> listaDeFuncao
 %type<tree> funcaoComParametros
 %type<tree> funcaoSemParametros
 %type<tree> parametrosFuncao
 %type<tree> listaParametrosFuncao
-// %type<tree> tipo TODO devemos especificar um tipo?
 %type<tree> blocoComando
 %type<tree> comandosSimples
 %type<tree> listaDeComandoSimples
@@ -71,7 +69,7 @@ extern void *arvore;
 
 %%
 
-programa: listaDeFuncao { $$ = $1; arvore = $$; asd_print_graphviz(arvore); /* asd_print($$); asd_print_graphviz($$); asd_free($$); */ }
+programa: listaDeFuncao { $$ = $1; arvore = $$; /* asd_print_graphviz(arvore); */ }
 | /* vazio */ { $$ = NULL; arvore = $$; }
 ;
 
@@ -81,11 +79,11 @@ listaDeFuncao: funcaoComParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2
 |  funcaoSemParametros { $$ = $1; }
 ;
 funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando 
-                     { $$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $6); };
+                     { $$ = asd_new($1->value); asd_add_child($$, $6); };
 funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando  
-                     { $$ = asd_new(nome_funcao($1->value)); asd_add_child($$, $5); };
+                     { $$ = asd_new($1->value); asd_add_child($$, $5); };
 
-tipo: TK_PR_INT | TK_PR_FLOAT // { $$ = NULL; }; // TODO devemos especificar uma ação?
+tipo: TK_PR_INT | TK_PR_FLOAT { $$ = NULL; }; // TODO devemos especificar uma ação?
 
 // TODO: deve constar na AST? não achei notação sobre, mas não sei se é pq to cego de sono
 parametrosFuncao: listaParametrosFuncao { $$ = NULL; };
@@ -100,9 +98,6 @@ literal: TK_LIT_INT { $$ = $1; }
 blocoComando: '{' listaDeComandoSimples '}'  { $$ = $2; } 
 | '{' /* vazio */ '}' { $$ = NULL; } // Não gera AST 
 ;
-
-// blocoComandoVazio: '{' '}'  //Todo acho que foi removido dos dos tipos acima. Acredito que tenha que voltar pois todas as produções devem gerar algo.
-                            // Sim, na verdade isso bugou com um merge q eu dei. Eu tinha removido essa produção e juntado com a anterior pra simplificar um pouco
 
 comandosSimples: var { $$ = $1; }
 | blocoComando { $$ = $1; }
@@ -147,7 +142,6 @@ condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
            { $$ = asd_new("while"); asd_add_child($$, $3); asd_add_child($$, $5); };
 
-// Quanto mais embaixo, maior a precedência (mais perto das folhas da árvore de derivação)
 expressao: expressao TK_OC_OR exp1 { $$ = asd_new("|"); asd_add_child($$, $1); asd_add_child($$, $3); } 
     | exp1 { $$ = $1; }
 exp1: exp1 TK_OC_AND exp2 { $$ = asd_new("&"); asd_add_child($$, $1); asd_add_child($$, $3); } 

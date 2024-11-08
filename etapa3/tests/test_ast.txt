@@ -1,3 +1,4 @@
+// OK
 main = > int
 {
 	int has_finished <= 0;
