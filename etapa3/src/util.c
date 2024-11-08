@@ -34,6 +34,7 @@ void exporta(void *arvore)
     
     int i = 0;
     for (i = 0; i < tree->number_of_children; i++) {
+        fprintf(stdout, "%p, %p\n", tree, tree->children[i]);
         exporta(tree->children[i]);
     }
 
