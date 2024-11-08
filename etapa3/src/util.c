@@ -37,6 +37,11 @@ void exporta(void *arvore)
         exporta(tree->children[i]);
     }
 
+    // Libera memória ao final da exportação
+    free(tree->children);
+    free(tree->label);
+    free(tree);
+
     return;
 }
 
@@ -50,7 +55,7 @@ char *nome_funcao(char *nomeFuncao)
         return NULL;
     }
 
-    snprintf(nomeFinal, tamanhoFinal, "%s %s", CALL, nomeFuncao);
+    snprintf(nomeFinal, tamanhoFinal, "%s %s", CALL, nomeFuncao); // qual é o motivo disso?
 
     return nomeFinal;
 }
