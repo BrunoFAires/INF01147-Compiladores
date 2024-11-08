@@ -3,7 +3,6 @@
 lex_value_t *lex_value_new(int lineno, lex_type type, char *value)
 {
     lex_value_t *ret = NULL;
-    // TODO cuidar leak
     ret = calloc(1, sizeof(lex_value_t));
     if (ret != NULL) {
         ret->lineno = lineno;

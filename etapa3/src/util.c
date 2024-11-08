@@ -39,8 +39,11 @@ void exporta(void *arvore)
 
     // Libera memória ao final da exportação
     free(tree->children);
+    tree->children = NULL;
     free(tree->label);
+    tree->label = NULL;
     free(tree);
+    tree = NULL;
 
     return;
 }

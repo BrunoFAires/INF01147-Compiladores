@@ -22,7 +22,6 @@ extern void *arvore;
     asd_tree_t *tree;
 }
 
-// TODO: valor para tokens além de identificador e literal??
 %token<value> TK_PR_INT
 %token<value> TK_PR_FLOAT
 %token<value> TK_PR_IF
@@ -83,9 +82,8 @@ funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando
 funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando  
                      { $$ = asd_new($1->value); if($5 != NULL) asd_add_child($$, $5); };
 
-tipo: TK_PR_INT | TK_PR_FLOAT { $$ = NULL; }; // TODO devemos especificar uma ação?
+tipo: TK_PR_INT | TK_PR_FLOAT { $$ = NULL; };
 
-// TODO: deve constar na AST? não achei notação sobre, mas não sei se é pq to cego de sono
 parametrosFuncao: listaParametrosFuncao { $$ = NULL; };
 listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo {  $$ = NULL; }
 | TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao { $$ = NULL; }
@@ -113,7 +111,6 @@ listaDeComandoSimples: comandosSimples';' listaDeComandoSimples { $$ = $1; if($$
 ;
 
 var: tipo listaVar { $$ = $2; };
-
 listaVar: TK_IDENTIFICADOR { $$ = NULL; } // Não gera AST
 | TK_IDENTIFICADOR TK_OC_LE literal  
 { $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); }
@@ -136,7 +133,7 @@ retorno: TK_PR_RETURN expressao { $$ = asd_new("return"); asd_add_child($$, $2);
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
              { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, $7); }
            | TK_PR_IF '(' expressao ')' blocoComando
-             { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, NULL); }
+             { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); }
            ;
 
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
