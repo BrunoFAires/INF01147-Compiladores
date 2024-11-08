@@ -45,10 +45,9 @@ void exporta(void *arvore)
     return;
 }
 
-char *nome_funcao(char *nomeFuncao)
+char *call_funcao(char *nomeFuncao)
 {
     size_t tamanhoFinal = strlen(CALL) + 1 + strlen(nomeFuncao) + 1;
-    // TODO cuidar leak
     char *nomeFinal = malloc(tamanhoFinal);
 
     if (nomeFinal == NULL) {
