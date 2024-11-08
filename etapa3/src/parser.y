@@ -129,13 +129,13 @@ listaArgumento: expressao { $$ = $1; }
 retorno: TK_PR_RETURN expressao { $$ = asd_new("return"); asd_add_child($$, $2); };
 
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
-             { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); asd_add_child($$, $7); }
+             { $$ = asd_new("if"); asd_add_child($$, $3); if ($5 != NULL) asd_add_child($$, $5); if ($7 != NULL) asd_add_child($$, $7); }
            | TK_PR_IF '(' expressao ')' blocoComando
-             { $$ = asd_new("if"); asd_add_child($$, $3); asd_add_child($$, $5); }
+             { $$ = asd_new("if"); asd_add_child($$, $3); if ($5 != NULL) asd_add_child($$, $5); }
            ;
 
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
-           { $$ = asd_new("while"); asd_add_child($$, $3); asd_add_child($$, $5); };
+           { $$ = asd_new("while"); asd_add_child($$, $3); if ($5 != NULL) asd_add_child($$, $5); };
 
 expressao: expressao TK_OC_OR exp1 { $$ = asd_new("|"); asd_add_child($$, $1); asd_add_child($$, $3); } 
     | exp1 { $$ = $1; }
