@@ -1,6 +1,29 @@
-main = > int
-{
-	int x1 <= 8, x3, x4 <= 3, x5, x6 <= 5;
+main = > int {
+int a;
+minha_var = a;
+int a <= 1, c <= 50;
+int a <= 5;
 
-	return 0;
+}
+
+teste = a <- int | b <- int > int {
+int temp;
+temp = ((a+b)/55*32) | 1;
+teste2(100);
+if(temp == 1){
+return 55;
+}else{
+return 0;
+};
+}
+
+teste2 = value <- int > int {
+    int a, b;
+    a = value;
+    while(100 > 0){
+        b = b + 1;
+        a = a - 1;
+    };
+    int a <= 0;
+    {};
 }

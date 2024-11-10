@@ -7,6 +7,7 @@
 int yylex(void);
 void yyerror (char const *mensagem);
 extern void *arvore;
+#define MIN_NUM_CHILDREN_VAR 2
 
 %}
 
@@ -103,9 +104,11 @@ comandosSimples: blocoComando { $$ = $1; }
 | retorno { $$ = $1; }
 ;
 
-listaDeComandoSimples: comandosSimples';' listaDeComandoSimples { $$ = $1; if ($$ != NULL && $3 != NULL) asd_add_child($$, $3); else $$ = $3; }
-| var';' listaDeComandoSimples { $$ = $1; if ($$ != NULL && $3 != NULL) asd_add_child(asd_get_last_node($$, 2), $3); else $$ = $3; }
+listaDeComandoSimples: comandosSimples';' listaDeComandoSimples { $$ = $1; if ($$ != NULL) { if($3 != NULL) asd_add_child($$, $3); } else $$ = $3; }
+| var';' listaDeComandoSimples 
+{ $$ = $1; if ($$ != NULL) { if($3 != NULL) asd_add_child(asd_get_last_node($$, MIN_NUM_CHILDREN_VAR), $3); } else $$ = $3; }
 | comandosSimples';' { $$ = $1; }
+| var';' { $$ = $1; }
 ;
 
 var: tipo listaVar { $$ = $2; };
