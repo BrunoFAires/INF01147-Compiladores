@@ -104,7 +104,7 @@ comandosSimples: blocoComando { $$ = $1; }
 ;
 
 listaDeComandoSimples: comandosSimples';' listaDeComandoSimples { $$ = $1; if ($$ != NULL && $3 != NULL) asd_add_child($$, $3); else $$ = $3; }
-| var';' listaDeComandoSimples { $$ = $1; if ($3 != NULL) asd_add_child(asd_get_last_node($$), $3); }
+| var';' listaDeComandoSimples { $$ = $1; if ($$ != NULL && $3 != NULL) asd_add_child(asd_get_last_node($$, 2), $3); else $$ = $3; }
 | comandosSimples';' { $$ = $1; }
 ;
 

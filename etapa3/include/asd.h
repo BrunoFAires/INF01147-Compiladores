@@ -25,7 +25,7 @@ void asd_add_child(asd_tree_t *tree, asd_tree_t *child);
 /*
  * Função asd_get_last_node, retorna último nodo com filhos.
  */
-asd_tree_t* asd_get_last_node(asd_tree_t *tree);
+asd_tree_t* asd_get_last_node(asd_tree_t *tree, int min_number_of_children);
 
 /*
  * Função asd_print, imprime recursivamente a árvore.

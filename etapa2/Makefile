@@ -1,6 +1,6 @@
 IDIR = include
 CC = gcc
-CFLAGS = -I$(IDIR)
+CFLAGS = -I$(IDIR) # -g
 ODIR = build
 SDIR = src
 LOGDIR = logs
