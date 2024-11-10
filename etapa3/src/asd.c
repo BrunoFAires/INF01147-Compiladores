@@ -43,6 +43,20 @@ void asd_add_child(asd_tree_t *tree, asd_tree_t *child)
   }
 }
 
+asd_tree_t* asd_get_last_node(asd_tree_t *tree)
+{
+  asd_tree_t *node = tree;
+  if (node != NULL){
+    int num_children = node->number_of_children;
+    while (node->children[num_children-1] != NULL){
+      node = node->children[num_children-1];
+    }
+    return node;
+  }else{
+    printf("Erro: %s recebeu parâmetro tree = %p.\n", __FUNCTION__, tree);
+  }
+}
+
 static void _asd_print (FILE *foutput, asd_tree_t *tree, int profundidade)
 {
   int i;

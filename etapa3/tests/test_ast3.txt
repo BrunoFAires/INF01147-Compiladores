@@ -1,16 +1,6 @@
 main = > int
 {
-	int has_finished <= 1;
-	{};
-	//if (x >= 0)
-	//{
-	//	int a <= 10;
-	//	while (a > 0)
-	//	{
-	//		compute(x, a, !a, a + x * x);
-	//	};
-	//};
-	//{};
-	
+	int x1 <= 8, x3, x4 <= 3, x5, x6 <= 5;
+
 	return 0;
 }
