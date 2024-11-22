@@ -61,7 +61,7 @@ etapa[1-7]/etapa[1-7]
 **/parser.output
 **/*.pdf
 **/*.xopp
-# **/tests/*
+**/tests/*
 
 # VS Code
 .vscode/*
