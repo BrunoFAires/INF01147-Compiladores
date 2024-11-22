@@ -5,7 +5,7 @@
 #include "macros.h"
 
 // TODO: dar free no lex_value depois de copiar dados
-entrada_t *criarEntrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, char *valor)
+entrada_t *criar_entrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, char *valor)
 {
     entrada_t *ret = NULL;
     ret = calloc(1, sizeof(entrada_t));
@@ -21,7 +21,7 @@ entrada_t *criarEntrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, 
     return ret;
 }
 
-void destruirEntrada(entrada_t *entrada)
+void destruir_entrada(entrada_t *entrada)
 {
     if (entrada != NULL) {
         free(entrada->valor);
@@ -31,7 +31,7 @@ void destruirEntrada(entrada_t *entrada)
     }
 }
 
-tabela_t *criarTabela(entrada_t *entrada)
+tabela_t *criar_tabela(entrada_t *entrada)
 {
     tabela_t *ret = NULL;
     ret = calloc(1, sizeof(tabela_t));
@@ -46,11 +46,25 @@ tabela_t *criarTabela(entrada_t *entrada)
     return ret;
 }
 
-void destruirTabela(tabela_t *tabela)
+tabela_t *criar_tabela_vazia()
+{
+    tabela_t *ret = NULL;
+    ret = calloc(1, sizeof(tabela_t));
+    if (ret != NULL) {
+        ret->entradas = NULL;
+        ret->num_entradas = 0;
+    } else {
+        printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
+    }
+
+    return ret;
+}
+
+void destruir_tabela(tabela_t *tabela)
 {
     if (tabela != NULL) {
         for (int i = 0; i < tabela->num_entradas; i++) {
-            destruirEntrada(tabela->entradas[i]);
+            destruir_entrada(tabela->entradas[i]);
         }
         free(tabela->entradas);
         free(tabela);
@@ -59,7 +73,7 @@ void destruirTabela(tabela_t *tabela)
     }
 }
 
-int buscarEntrada(tabela_t *tabela, char *valor)
+int buscar_entrada(tabela_t *tabela, char *valor)
 {
     if (tabela != NULL) {
         for (int i = 0; i < tabela->num_entradas; i++) {
@@ -74,7 +88,7 @@ int buscarEntrada(tabela_t *tabela, char *valor)
     return 0;
 }
 
-void inserirEntrada(tabela_t *tabela, entrada_t *entrada)
+void inserir_entrada(tabela_t *tabela, entrada_t *entrada)
 {
     if (tabela != NULL && entrada != NULL) {
         tabela->num_entradas++;
@@ -85,7 +99,7 @@ void inserirEntrada(tabela_t *tabela, entrada_t *entrada)
     }
 }
 
-void printTabela(tabela_t *tabela)
+void print_tabela(tabela_t *tabela)
 {
     if (tabela != NULL) {
         for (int i = 0; i < tabela->num_entradas; i++) {

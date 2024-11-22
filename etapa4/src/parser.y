@@ -70,11 +70,14 @@ extern void *pilha;
 %type<tree> fator
 
 %%
-inicio: abreEscopo programa fechaEscopo //abertura do escopo global
+inicio: abreEscopoGlobal programa fechaEscopoGlobal //abertura do escopo global
 
-abreEscopo: {}
-fechaEscopo: {}
+abreEscopoGlobal: /* vazio */ { tabela_t *tabela_g = criar_tabela_vazia() ; pilha = (pilha_t*) criar_pilha(tabela_g) ; print_pilha(pilha); }
+fechaEscopoGlobal: /* vazio */ { destruir_pilha(pilha); }
 
+abreEscopo: /* vazio */ {}
+fechaEscopo: /* vazio */ {}
+ 
 programa: listaDeFuncao { $$ = $1; arvore = $$; /* asd_print_graphviz(arvore); */ }
 | /* vazio */ { $$ = NULL; arvore = $$; }
 ;

@@ -9,13 +9,13 @@ typedef struct Pilha
     struct Pilha *proximo;
 } pilha_t;
 
-pilha_t *criarPilha(tabela_t *tabela);
-void destruirPilha(pilha_t *topo);
+pilha_t *criar_pilha(tabela_t *tabela);
+void destruir_pilha(pilha_t *topo);
 
 int buscar(pilha_t *topo, char *valor);
 void empilhar(pilha_t **topo, tabela_t *tabela);
 void desempilhar(pilha_t **topo);
 
-void printPilha(pilha_t *topo);
+void print_pilha(pilha_t *topo);
 
 #endif

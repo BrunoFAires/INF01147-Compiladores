@@ -27,15 +27,16 @@ typedef struct Tabela
     int num_entradas;
 } tabela_t;
 
-entrada_t *criarEntrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, char *valor);
-void destruirEntrada(entrada_t *entrada);
+entrada_t *criar_entrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, char *valor);
+void destruir_entrada(entrada_t *entrada);
 
-tabela_t *criarTabela(entrada_t *entrada);
-void destruirTabela(tabela_t *tabela);
+tabela_t *criar_tabela(entrada_t *entrada);
+tabela_t *criar_tabela_vazia();
+void destruir_tabela(tabela_t *tabela);
 
-int buscarEntrada(tabela_t *tabela, char *valor);
-void inserirEntrada(tabela_t *tabela, entrada_t *entrada);
+int buscar_entrada(tabela_t *tabela, char *valor);
+void inserir_entrada(tabela_t *tabela, entrada_t *entrada);
 
-void printTabela(tabela_t *tabela);
+void print_tabela(tabela_t *tabela);
 
 #endif

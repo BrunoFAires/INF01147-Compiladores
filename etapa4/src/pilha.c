@@ -3,7 +3,7 @@
 #include "pilha.h"
 #include "macros.h"
 
-pilha_t *criarPilha(tabela_t *tabela)
+pilha_t *criar_pilha(tabela_t *tabela)
 {
     pilha_t *ret = NULL;
     ret = (pilha_t *) malloc(sizeof(pilha_t));
@@ -17,14 +17,14 @@ pilha_t *criarPilha(tabela_t *tabela)
     return ret;
 }
 
-void destruirPilha(pilha_t *topo)
+void destruir_pilha(pilha_t *topo)
 {
     if (topo != NULL) {
         pilha_t *aux = topo;
         while (aux != NULL) {
             pilha_t *temp = aux;
             aux = aux->proximo;
-            if (temp->tabela != NULL) destruirTabela(temp->tabela);
+            if (temp->tabela != NULL) destruir_tabela(temp->tabela);
             free(temp);
         }
     } else {
@@ -38,7 +38,7 @@ int buscar(pilha_t *topo, char *valor)
     if (topo != NULL) {
         pilha_t *aux = topo;
         while (aux != NULL) {
-            if (buscarEntrada(aux->tabela, valor) == 1) return 1;
+            if (buscar_entrada(aux->tabela, valor) == 1) return 1;
             aux = aux->proximo;
         }
     } 
@@ -49,7 +49,7 @@ int buscar(pilha_t *topo, char *valor)
 void empilhar(pilha_t **topo, tabela_t *tabela)
 {
     if (topo != NULL && *topo != NULL) {
-        pilha_t *nova_entrada = criarPilha(tabela);
+        pilha_t *nova_entrada = criar_pilha(tabela);
         nova_entrada->proximo = *topo;
         *topo = nova_entrada;
     } else {
@@ -62,21 +62,21 @@ void desempilhar(pilha_t **topo)
     if (topo != NULL && *topo != NULL) {
         pilha_t *aux = *topo;
         *topo = (*topo)->proximo;
-        destruirTabela(aux->tabela);
+        destruir_tabela(aux->tabela);
         free(aux);
     } else {
         printf("Erro: %s recebeu parâmetro topo = %p.\n", __FUNCTION__, topo);
     }
 }
 
-void printPilha(pilha_t *topo)
+void print_pilha(pilha_t *topo)
 {
     if (topo != NULL) {
         printf("Pilha:\n");
         pilha_t *aux = topo;
         while (aux != NULL) {
             printf("Tabela:\n");
-            printTabela(aux->tabela);
+            print_tabela(aux->tabela);
             printf("-------------------------------------------------------------\n");
             aux = aux->proximo;
         }

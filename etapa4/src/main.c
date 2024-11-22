@@ -11,7 +11,7 @@ void exporta (void *arvore);
 int main (int argc, char **argv)
 {
   int ret = yyparse(); 
-  exporta (arvore);
+  // exporta(arvore);
   yylex_destroy();
   return ret;
 }
