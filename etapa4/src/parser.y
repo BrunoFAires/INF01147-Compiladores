@@ -49,6 +49,7 @@ extern void *arvore;
 %type<tree> parametrosFuncao
 %type<tree> listaParametrosFuncao
 %type<tree> blocoComando
+%type<tree> blocoComandoFuncao
 %type<tree> comandosSimples
 %type<tree> listaDeComandoSimples
 %type<tree> var
@@ -68,21 +69,25 @@ extern void *arvore;
 %type<tree> fator
 
 %%
-//inicio: empilha programa desempilha ou no programa
+inicio: abreEscopo programa fechaEscopo //abertura do escopo global
+
+abreEscopo: {}
+fechaEscopo: {}
 
 programa: listaDeFuncao { $$ = $1; arvore = $$; /* asd_print_graphviz(arvore); */ }
 | /* vazio */ { $$ = NULL; arvore = $$; }
 ;
 
-listaDeFuncao: funcaoComParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2); }
+listaDeFuncao: funcaoComParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2); } //criar a lógica para adicionar as funções no escopo global
 |  funcaoSemParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2); }
 |  funcaoComParametros { $$ = $1; }
 |  funcaoSemParametros { $$ = $1; }
 ;
-funcaoComParametros: TK_IDENTIFICADOR '=' parametrosFuncao '>' tipo blocoComando 
+
+funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopo parametrosFuncao '>' tipo blocoComandoFuncao //abertura do escopo da função com o fechamento do mesmo no final do bloco de comando da função; 
+                     { $$ = asd_new($1.value); if($7 != NULL) asd_add_child($$, $7); };
+funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopo '>' tipo blocoComandoFuncao  // abrir escopo mesmo quando não há parâmetros? Talvez não abrir aqui e usar blocoComando e não blocoComandoFuncao
                      { $$ = asd_new($1.value); if($6 != NULL) asd_add_child($$, $6); };
-funcaoSemParametros: TK_IDENTIFICADOR '=' '>' tipo blocoComando  
-                     { $$ = asd_new($1.value); if($5 != NULL) asd_add_child($$, $5); };
 
 tipo: TK_PR_INT | TK_PR_FLOAT;
 
@@ -95,9 +100,11 @@ literal: TK_LIT_INT { $$ = $1; }
 | TK_LIT_FLOAT { $$ = $1; }
 ;
 
-//blocoDeComandoFuncao: {}
+blocoComandoFuncao: '{' listaDeComandoSimples fechaEscopo '}'  { $$ = $2; } 
+| '{' /* vazio */ fechaEscopo '}' { $$ = NULL; } // Não gera AST 
+;
 
-blocoComando: '{' listaDeComandoSimples '}'  { $$ = $2; } 
+blocoComando: '{' abreEscopo listaDeComandoSimples fechaEscopo '}'  { $$ = $3; } 
 | '{' /* vazio */ '}' { $$ = NULL; } // Não gera AST 
 ;
 
