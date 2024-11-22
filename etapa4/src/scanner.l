@@ -24,9 +24,9 @@ return              { return TK_PR_RETURN; }
 \!=                 { return TK_OC_NE; }
 \&                  { return TK_OC_AND; }
 \|                  { return TK_OC_OR; }
-([a-z_]+[0-9]*)+    { yylval.lex_value = (lex_value_t){get_line_number(), IDENTIFIER, strdup(yytext)}; return TK_IDENTIFICADOR; }
-[0-9]+              { yylval.lex_value = (lex_value_t){get_line_number(), LITERAL, strdup(yytext)}; return TK_LIT_INT; }
-[0-9]*\.[0-9]+      { yylval.lex_value = (lex_value_t){get_line_number(), LITERAL, strdup(yytext)}; return TK_LIT_FLOAT; }
+([a-z_]+[0-9]*)+    { yylval.lex_value = lex_value_new(get_line_number(), IDENTIFIER, PLACEHOLDER, yytext); return TK_IDENTIFICADOR; }
+[0-9]+              { yylval.lex_value = lex_value_new(get_line_number(), INT, IDENTIFIER, yytext); return TK_LIT_INT; }
+[0-9]*\.[0-9]+      { yylval.lex_value = lex_value_new(get_line_number(), FLOAT, IDENTIFIER, yytext); return TK_LIT_FLOAT; }
 .                   { return TK_ERRO; }
 
 %%

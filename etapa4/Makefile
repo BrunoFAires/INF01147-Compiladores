@@ -14,12 +14,12 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: dirs clean run
 
-etapa3: $(OBJ)
+etapa4: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-run: etapa3
-	@echo Executando etapa 3...
-	./etapa3
+run: etapa4
+	@echo Executando etapa 4...
+	./etapa4
 
 # Bison
 B_DEPS = $(SDIR)/parser.y $(SDIR)/util.c $(IDIR)/util.h $(SDIR)/asd.c $(IDIR)/asd.h $(SDIR)/lex_value.c $(IDIR)/lex_value.h $(SDIR)/pilha.c $(IDIR)/pilha.h $(SDIR)/tabela.c $(IDIR)/tabela.h

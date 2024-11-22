@@ -3,39 +3,18 @@
 
 #include "lex_value.h"
 
-typedef enum Natureza
-{
-  FUNCAO,
-  IDENTIFICADOR
-} Natureza;
-
-typedef enum TipoDado
-{
-  FLOAT,
-  INTEIRO
-} TipoDado;
-
-typedef struct Entrada
-{
-  int linha;
-  Natureza natureza;
-  TipoDado tipoDado;
-  lex_value_t value;
-} Entrada;
-
 typedef struct Tabela
 {
-  Entrada Entrada;
-  Entrada *proxima;
-} Tabela;
+  lex_value_t **entradas;
+  int num_entradas;
+} tabela_t;
 
-Tabela *criarTabela();
-void destruirTabela(Tabela *table);
+tabela_t *criarTabela(lex_value_t *entrada);
+void destruirTabela(tabela_t *tabela);
 
-void buscarEntrada(Tabela *tabela, char *valor);
-void inserir(Tabela *tabela, Entrada *entrada);
+void buscarEntrada(tabela_t *tabela, char *valor);
+void inserirEntrada(tabela_t *tabela, lex_value_t *entrada);
 
-void destruirEntrada(Entrada *entrada);
-Entrada *criarEntrada();
+void printTabela(tabela_t *tabela);
 
 #endif

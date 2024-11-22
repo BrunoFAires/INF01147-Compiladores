@@ -1,12 +1,13 @@
 #include "lex_value.h"
 
-lex_value_t *lex_value_new(int lineno, lex_type type, char *value)
+lex_value_t *lex_value_new(int lineno, lex_type_t type, nature_t nature, char *value)
 {
     lex_value_t *ret = NULL;
     ret = calloc(1, sizeof(lex_value_t));
     if (ret != NULL) {
         ret->lineno = lineno;
         ret->type = type;
+        ret->nature = nature;
         ret->value = strdup(value);
     }
 

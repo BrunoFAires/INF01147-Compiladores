@@ -5,15 +5,17 @@
 
 typedef struct Pilha
 {
-  Tabela tabela;
-  Tabela *proximo;
-} Pilha;
+  tabela_t *tabela;
+  struct Pilha *proximo;
+} pilha_t;
 
-Pilha *criarPilha();
-void destruirPilha(Pilha *topo);
+pilha_t *criarPilha();
+void destruirPilha(pilha_t *topo);
 
-void buscar(Pilha *topo, char *valor);
-void empilhar(Pilha *topo, Tabela *tabela);
-void desempilhar(Pilha *topo);
+void buscar(pilha_t *topo, char *valor);
+void empilhar(pilha_t *topo, tabela_t *tabela);
+void desempilhar(pilha_t *topo);
+
+void printPilha(pilha_t *topo);
 
 #endif

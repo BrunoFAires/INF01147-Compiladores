@@ -20,27 +20,27 @@ extern void *arvore;
 }
 
 %union {
-    lex_value_t lex_value;
+    lex_value_t *lex_value;
     asd_tree_t *tree;
 }
 
-%token<lex_value> TK_PR_INT
-%token<lex_value> TK_PR_FLOAT
-%token<lex_value> TK_PR_IF
-%token<lex_value> TK_PR_ELSE
-%token<lex_value> TK_PR_WHILE
-%token<lex_value> TK_PR_RETURN
-%token<lex_value> TK_OC_LE
-%token<lex_value> TK_OC_GE
-%token<lex_value> TK_OC_EQ
-%token<lex_value> TK_OC_NE
-%token<lex_value> TK_OC_AND
-%token<lex_value> TK_OC_OR
+%token TK_PR_INT
+%token TK_PR_FLOAT
+%token TK_PR_IF
+%token TK_PR_ELSE
+%token TK_PR_WHILE
+%token TK_PR_RETURN
+%token TK_OC_LE
+%token TK_OC_GE
+%token TK_OC_EQ
+%token TK_OC_NE
+%token TK_OC_AND
+%token TK_OC_OR
 %token<lex_value> TK_IDENTIFICADOR
 %token<lex_value> TK_LIT_INT
 %token<lex_value> TK_LIT_FLOAT
-%token<lex_value> TK_ERRO
 %type<lex_value> literal
+%token TK_ERRO
 
 %type<tree> programa
 %type<tree> listaDeFuncao
@@ -85,9 +85,9 @@ listaDeFuncao: funcaoComParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2
 ;
 
 funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopo parametrosFuncao '>' tipo blocoComandoFuncao //abertura do escopo da função com o fechamento do mesmo no final do bloco de comando da função; 
-                     { $$ = asd_new($1.value); if($7 != NULL) asd_add_child($$, $7); };
+                     { $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7); };
 funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopo '>' tipo blocoComandoFuncao  // abrir escopo mesmo quando não há parâmetros? Talvez não abrir aqui e usar blocoComando e não blocoComandoFuncao
-                     { $$ = asd_new($1.value); if($6 != NULL) asd_add_child($$, $6); };
+                     { $$ = asd_new($1->value); if($6 != NULL) asd_add_child($$, $6); };
 
 tipo: TK_PR_INT | TK_PR_FLOAT;
 
@@ -126,17 +126,17 @@ listaDeComandoSimples: comandosSimples';' listaDeComandoSimples { $$ = $1; if ($
 var: tipo listaVar { $$ = $2; };
 listaVar: TK_IDENTIFICADOR { $$ = NULL; } // Não gera AST
 | TK_IDENTIFICADOR TK_OC_LE literal  
-{ $$ = asd_new("<="); asd_add_child($$, asd_new($1.value)); asd_add_child($$, asd_new($3.value)); }
+{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); }
 | TK_IDENTIFICADOR',' listaVar 
 { $$ = $3; }
 | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar 
-{ $$ = asd_new("<="); asd_add_child($$, asd_new($1.value)); asd_add_child($$, asd_new($3.value)); if($5 != NULL)asd_add_child($$, $5); }
+{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); if($5 != NULL)asd_add_child($$, $5); }
 ;
 
 atribuicao: TK_IDENTIFICADOR '=' expressao 
-{ $$ = asd_new("="); asd_add_child($$, asd_new($1.value)); asd_add_child($$, $3); };
+{ $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3); };
 
-chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')' { char *str_call_funcao = call_funcao($1.value); $$ = asd_new(str_call_funcao); asd_add_child($$, $3); free(str_call_funcao); };
+chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')' { char *str_call_funcao = call_funcao($1->value); $$ = asd_new(str_call_funcao); asd_add_child($$, $3); free(str_call_funcao); };
 listaArgumento: expressao { $$ = $1; } 
 | expressao',' listaArgumento { $$ = $1; asd_add_child($$, $3); }
 ;
@@ -178,9 +178,9 @@ termo:  termo '%' fator { $$ = asd_new("%"); asd_add_child($$, $1); asd_add_chil
 fator: '!' fator { $$ = asd_new("!"); asd_add_child($$, $2); }
      | '-' fator { $$ = asd_new("-"); asd_add_child($$, $2); }
      | '(' expressao ')' { $$ = $2; }
-     | TK_IDENTIFICADOR { $$ = asd_new($1.value); }
-     | TK_LIT_INT { $$ = asd_new($1.value); }
-     | TK_LIT_FLOAT { $$ = asd_new($1.value); }
+     | TK_IDENTIFICADOR { $$ = asd_new($1->value); }
+     | TK_LIT_INT { $$ = asd_new($1->value); }
+     | TK_LIT_FLOAT { $$ = asd_new($1->value); }
      | chamadaFuncao { $$ = $1; }
      ;
 
