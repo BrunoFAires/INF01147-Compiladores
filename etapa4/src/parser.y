@@ -7,6 +7,7 @@
 int yylex(void);
 void yyerror (char const *mensagem);
 extern void *arvore;
+extern void *pilha;
 #define MIN_NUM_CHILDREN_VAR 2
 
 %}

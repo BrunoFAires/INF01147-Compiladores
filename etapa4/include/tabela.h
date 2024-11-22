@@ -33,7 +33,7 @@ void destruirEntrada(entrada_t *entrada);
 tabela_t *criarTabela(entrada_t *entrada);
 void destruirTabela(tabela_t *tabela);
 
-void buscarEntrada(tabela_t *tabela, char *valor);
+int buscarEntrada(tabela_t *tabela, char *valor);
 void inserirEntrada(tabela_t *tabela, entrada_t *entrada);
 
 void printTabela(tabela_t *tabela);

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "tabela.h"
+#include "macros.h"
 
 // TODO: dar free no lex_value depois de copiar dados
 entrada_t *criarEntrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, char *valor)
@@ -58,18 +59,19 @@ void destruirTabela(tabela_t *tabela)
     }
 }
 
-void buscarEntrada(tabela_t *tabela, char *valor)
+int buscarEntrada(tabela_t *tabela, char *valor)
 {
     if (tabela != NULL) {
         for (int i = 0; i < tabela->num_entradas; i++) {
             if (strcmp(tabela->entradas[i]->valor, valor) == 0) {
-                printf("Valor encontrado: %s\n", valor);
-                return;
+                return 1;
             }
         }
     } else {
         printf("Erro: %s recebeu parâmetro tabela = %p.\n", __FUNCTION__, tabela);
     }
+
+    return 0;
 }
 
 void inserirEntrada(tabela_t *tabela, entrada_t *entrada)
@@ -89,9 +91,7 @@ void printTabela(tabela_t *tabela)
         for (int i = 0; i < tabela->num_entradas; i++) {
             char *tipo = tabela->entradas[i]->tipo_simbolo == FLOAT ? "FLOAT" : "INT";
             char *natureza = tabela->entradas[i]->natureza == NAT_FUNCAO ? "FUNCAO" : "IDENTIFICADOR";
-            printf("Linha: %100d\tValor: %s\tTipo: %s\tNatureza: %s\n", tabela->entradas[i]->linha, tabela->entradas[i]->valor, tipo, natureza);
-            free(tipo);
-            free(natureza);
+            printf("Linha: %3d\tValor: %s\tTipo: %s\tNatureza: %s\n", tabela->entradas[i]->linha, tabela->entradas[i]->valor, tipo, natureza);
         }
     } else {
         printf("Erro: %s recebeu parâmetro tabela = %p.\n", __FUNCTION__, tabela);
