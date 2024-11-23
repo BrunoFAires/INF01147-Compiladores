@@ -73,6 +73,7 @@ void destruir_tabela(tabela_t *tabela)
     }
 }
 
+// TODO: retornar a entrada encontrada ou null
 int buscar_entrada(tabela_t *tabela, char *valor)
 {
     if (tabela != NULL) {
@@ -103,7 +104,22 @@ void print_tabela(tabela_t *tabela)
 {
     if (tabela != NULL) {
         for (int i = 0; i < tabela->num_entradas; i++) {
-            char *tipo = tabela->entradas[i]->tipo_simbolo == FLOAT ? "FLOAT" : "INT";
+            char *tipo;
+            switch (tabela->entradas[i]->tipo_simbolo)
+            {
+                case INT:
+                    tipo = "INT";
+                    break;
+                case FLOAT:
+                    tipo = "FLOAT";
+                    break;
+                case PLACEHOLDER:
+                    tipo = "PLACEHOLDER";
+                    break;
+                default:
+                    tipo = "ERRO MUITO ESTRANHO :(";
+                    break;
+            }
             char *natureza = tabela->entradas[i]->natureza == NAT_FUNCAO ? "FUNCAO" : "IDENTIFICADOR";
             printf("Linha: %3d\tValor: %s\tTipo: %s\tNatureza: %s\n", tabela->entradas[i]->linha, tabela->entradas[i]->valor, tipo, natureza);
         }

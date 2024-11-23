@@ -3,6 +3,9 @@
 #include "pilha.h"
 #include "macros.h"
 
+#define COLOR_BOLD "\e[1m"
+#define COLOR_OFF  "\e[m"
+
 pilha_t *criar_pilha(tabela_t *tabela)
 {
     pilha_t *ret = NULL;
@@ -72,7 +75,7 @@ void desempilhar(pilha_t **topo)
 void print_pilha(pilha_t *topo)
 {
     if (topo != NULL) {
-        printf("Pilha:\n");
+        printf(COLOR_BOLD "Pilha:\n" COLOR_OFF);
         pilha_t *aux = topo;
         while (aux != NULL) {
             printf("Tabela:\n");

@@ -62,3 +62,8 @@ char *call_funcao(char *nomeFuncao)
 
     return nomeFinal;
 }
+
+
+char *get_type(){
+    
+}

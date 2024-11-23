@@ -10,7 +10,8 @@ typedef enum Natureza
 typedef enum TipoSimbolo
 {
     INT,
-    FLOAT
+    FLOAT,
+    PLACEHOLDER
 } simbolo_t;
 
 typedef struct Entrada

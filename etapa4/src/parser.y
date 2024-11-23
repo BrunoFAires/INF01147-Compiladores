@@ -3,11 +3,12 @@
 %define parse.error verbose
 
 %{
+#include "pilha.h"
 
 int yylex(void);
 void yyerror (char const *mensagem);
 extern void *arvore;
-extern void *pilha;
+extern pilha_t *pilha;
 #define MIN_NUM_CHILDREN_VAR 2
 
 %}
@@ -18,11 +19,13 @@ extern void *pilha;
     #include "lex_value.h"
     #include "pilha.h"
     #include "tabela.h"
+    #include "macros.h"
 }
 
 %union {
     lex_value_t *lex_value;
     asd_tree_t *tree;
+
 }
 
 %token TK_PR_INT
@@ -47,6 +50,7 @@ extern void *pilha;
 %type<tree> listaDeFuncao
 %type<tree> funcaoComParametros
 %type<tree> funcaoSemParametros
+%type<tree> tipo
 %type<tree> parametrosFuncao
 %type<tree> listaParametrosFuncao
 %type<tree> blocoComando
@@ -72,44 +76,70 @@ extern void *pilha;
 %%
 inicio: abreEscopoGlobal programa fechaEscopoGlobal //abertura do escopo global
 
-abreEscopoGlobal: /* vazio */ { tabela_t *tabela_g = criar_tabela_vazia() ; pilha = (pilha_t*) criar_pilha(tabela_g) ; print_pilha(pilha); }
+abreEscopoGlobal: /* vazio */ 
+{ 
+    tabela_t *tabela_g = criar_tabela_vazia(); 
+    pilha = criar_pilha(tabela_g);  
+}
 fechaEscopoGlobal: /* vazio */ { destruir_pilha(pilha); }
 
-abreEscopo: /* vazio */ {}
-fechaEscopo: /* vazio */ {}
+abreEscopo: /* vazio */ 
+{
+    tabela_t *tabela = criar_tabela_vazia(); 
+    empilhar(&pilha, tabela);
+}
+fechaEscopo: /* vazio */ { desempilhar(&pilha); }
  
 programa: listaDeFuncao { $$ = $1; arvore = $$; /* asd_print_graphviz(arvore); */ }
 | /* vazio */ { $$ = NULL; arvore = $$; }
 ;
 
-listaDeFuncao: funcaoComParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2); } //criar a lógica para adicionar as funções no escopo global
-|  funcaoSemParametros listaDeFuncao { $$ = $1; asd_add_child($$, $2); }
-|  funcaoComParametros { $$ = $1; }
-|  funcaoSemParametros { $$ = $1; }
+listaDeFuncao: funcaoComParametros fechaEscopo listaDeFuncao { $$ = $1; asd_add_child($$, $3); }
+|  funcaoSemParametros fechaEscopo listaDeFuncao { $$ = $1; asd_add_child($$, $3); }
+|  funcaoComParametros fechaEscopo { $$ = $1; }
+|  funcaoSemParametros fechaEscopo { $$ = $1; }
 ;
 
-funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopo parametrosFuncao '>' tipo blocoComandoFuncao //abertura do escopo da função com o fechamento do mesmo no final do bloco de comando da função; 
-                     { $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7); };
-funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopo '>' tipo blocoComandoFuncao  // abrir escopo mesmo quando não há parâmetros? Talvez não abrir aqui e usar blocoComando e não blocoComandoFuncao
-                     { $$ = asd_new($1->value); if($6 != NULL) asd_add_child($$, $6); };
+funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopo parametrosFuncao '>' tipo blocoComandoFuncao
+{ 
+    $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7);
+    inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $6->type, $1->value));
+    asd_free($6);
+};
+funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopo '>' tipo blocoComandoFuncao
+{ 
+    $$ = asd_new($1->value); if($6 != NULL) asd_add_child($$, $6); 
+    inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $5->type, $1->value));
+    asd_free($5);
+};
 
-tipo: TK_PR_INT | TK_PR_FLOAT;
+tipo: TK_PR_INT { $$ = asd_new_type(INT); } | TK_PR_FLOAT { $$ = asd_new_type(FLOAT); } ;
 
 parametrosFuncao: listaParametrosFuncao { $$ = NULL; };
-listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo {  $$ = NULL; }
-| TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao { $$ = NULL; }
+listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo 
+{  
+    $$ = NULL; 
+    inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, $4->type, $1->value));
+    asd_free($4);
+}
+| TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao 
+{ 
+    $$ = NULL; 
+    inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, $4->type, $1->value));
+    asd_free($4);
+}
 ;
 
 literal: TK_LIT_INT { $$ = $1; }
 | TK_LIT_FLOAT { $$ = $1; }
 ;
 
-blocoComandoFuncao: '{' listaDeComandoSimples fechaEscopo '}'  { $$ = $2; } 
+blocoComandoFuncao: '{' listaDeComandoSimples '}'  { $$ = $2; } 
 | '{' /* vazio */ fechaEscopo '}' { $$ = NULL; } // Não gera AST 
 ;
 
-blocoComando: '{' abreEscopo listaDeComandoSimples fechaEscopo '}'  { $$ = $3; } 
-| '{' /* vazio */ '}' { $$ = NULL; } // Não gera AST 
+blocoComando: '{' abreEscopo listaDeComandoSimples { print_pilha(pilha); } fechaEscopo '}'  { $$ = $3; } 
+| '{'abreEscopo /* vazio */ fechaEscopo'}' { $$ = NULL; } // Não gera AST 
 ;
 
 comandosSimples: blocoComando { $$ = $1; }
@@ -121,23 +151,43 @@ comandosSimples: blocoComando { $$ = $1; }
 ;
 
 listaDeComandoSimples: comandosSimples';' listaDeComandoSimples { $$ = $1; if ($$ != NULL) { if($3 != NULL) asd_add_child($$, $3); } else $$ = $3; }
-| var';' listaDeComandoSimples 
+| var';' listaDeComandoSimples //essa 
 { $$ = $1; if ($$ != NULL) { if($3 != NULL) asd_add_child(asd_get_last_node($$, MIN_NUM_CHILDREN_VAR), $3); } else $$ = $3; }
 | comandosSimples';' { $$ = $1; }
-| var';' { $$ = $1; }
+| var';' { $$ = $1; } //essa
 ;
 
-var: tipo listaVar { $$ = $2; };
-listaVar: TK_IDENTIFICADOR { $$ = NULL; } // Não gera AST
+var: tipo listaVar 
+{ 
+    $$ = $2; 
+    // atribuir_tipo(pilha->tabela, $2, $1->type);
+    // asd_free($1);         
+}; // adicionar tipo aqui no final, iniciar com placeholder
+
+listaVar: TK_IDENTIFICADOR 
+{ 
+    $$ = NULL; 
+    //verificar se já não existe no escopo atual
+    inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+} // Não gera AST
 | TK_IDENTIFICADOR TK_OC_LE literal  
-{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); }
+{ 
+    $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); 
+    inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+}
 | TK_IDENTIFICADOR',' listaVar 
-{ $$ = $3; }
+{ 
+    $$ = $3; 
+    inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+}
 | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar 
-{ $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); if($5 != NULL)asd_add_child($$, $5); }
+{ 
+    $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); if($5 != NULL)asd_add_child($$, $5); 
+    inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+}
 ;
 
-atribuicao: TK_IDENTIFICADOR '=' expressao 
+atribuicao: TK_IDENTIFICADOR '=' expressao //Verificar se existe antes de atribuir
 { $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3); };
 
 chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')' { char *str_call_funcao = call_funcao($1->value); $$ = asd_new(str_call_funcao); asd_add_child($$, $3); free(str_call_funcao); };
