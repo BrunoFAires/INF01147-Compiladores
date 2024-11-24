@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "tabela.h"
 #include "macros.h"
+#include "errors.h"
 
 // TODO: dar free no lex_value depois de copiar dados
 entrada_t *criar_entrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, char *valor)
@@ -73,20 +74,19 @@ void destruir_tabela(tabela_t *tabela)
     }
 }
 
-// TODO: retornar a entrada encontrada ou null
-int buscar_entrada(tabela_t *tabela, char *valor)
+entrada_t *buscar_entrada(tabela_t *tabela, char *valor)
 {
     if (tabela != NULL) {
         for (int i = 0; i < tabela->num_entradas; i++) {
             if (strcmp(tabela->entradas[i]->valor, valor) == 0) {
-                return 1;
+                return tabela->entradas[i];
             }
         }
     } else {
         printf("Erro: %s recebeu parâmetro tabela = %p.\n", __FUNCTION__, tabela);
     }
 
-    return 0;
+    return NULL;
 }
 
 void inserir_entrada(tabela_t *tabela, entrada_t *entrada)

@@ -104,12 +104,14 @@ funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopo parametrosFuncao '>' tipo b
 { 
     $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7);
     inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $6->type, $1->value));
+    lex_value_free($1);
     asd_free($6);
 };
 funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopo '>' tipo blocoComandoFuncao
 { 
     $$ = asd_new($1->value); if($6 != NULL) asd_add_child($$, $6); 
     inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $5->type, $1->value));
+    lex_value_free($1);
     asd_free($5);
 };
 
@@ -120,12 +122,14 @@ listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo
 {  
     $$ = NULL; 
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, $4->type, $1->value));
+    lex_value_free($1);
     asd_free($4);
 }
 | TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao 
 { 
     $$ = NULL; 
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, $4->type, $1->value));
+    lex_value_free($1);
     asd_free($4);
 }
 ;
@@ -169,28 +173,41 @@ listaVar: TK_IDENTIFICADOR
     $$ = NULL; 
     //verificar se já não existe no escopo atual
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+    lex_value_free($1);
 } // Não gera AST
 | TK_IDENTIFICADOR TK_OC_LE literal  
 { 
     $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); 
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+    lex_value_free($1);
+    lex_value_free($3);
 }
 | TK_IDENTIFICADOR',' listaVar 
 { 
     $$ = $3; 
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+    lex_value_free($1);
 }
 | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar 
 { 
     $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); if($5 != NULL)asd_add_child($$, $5); 
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+    lex_value_free($1);
+    lex_value_free($3);
 }
 ;
 
 atribuicao: TK_IDENTIFICADOR '=' expressao //Verificar se existe antes de atribuir
-{ $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3); };
+{ 
+    $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3); 
+    lex_value_free($1);
+};
 
-chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')' { char *str_call_funcao = call_funcao($1->value); $$ = asd_new(str_call_funcao); asd_add_child($$, $3); free(str_call_funcao); };
+chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')' 
+{ 
+    char *str_call_funcao = call_funcao($1->value); $$ = asd_new(str_call_funcao); asd_add_child($$, $3); free(str_call_funcao);
+    lex_value_free($1); 
+};
 listaArgumento: expressao { $$ = $1; } 
 | expressao',' listaArgumento { $$ = $1; asd_add_child($$, $3); }
 ;
@@ -232,9 +249,9 @@ termo:  termo '%' fator { $$ = asd_new("%"); asd_add_child($$, $1); asd_add_chil
 fator: '!' fator { $$ = asd_new("!"); asd_add_child($$, $2); }
      | '-' fator { $$ = asd_new("-"); asd_add_child($$, $2); }
      | '(' expressao ')' { $$ = $2; }
-     | TK_IDENTIFICADOR { $$ = asd_new($1->value); }
-     | TK_LIT_INT { $$ = asd_new($1->value); }
-     | TK_LIT_FLOAT { $$ = asd_new($1->value); }
+     | TK_IDENTIFICADOR { $$ = asd_new($1->value); lex_value_free($1); }
+     | TK_LIT_INT { $$ = asd_new($1->value); lex_value_free($1); }
+     | TK_LIT_FLOAT { $$ = asd_new($1->value); lex_value_free($1); }
      | chamadaFuncao { $$ = $1; }
      ;
 

@@ -35,7 +35,7 @@ tabela_t *criar_tabela(entrada_t *entrada);
 tabela_t *criar_tabela_vazia();
 void destruir_tabela(tabela_t *tabela);
 
-int buscar_entrada(tabela_t *tabela, char *valor);
+entrada_t *buscar_entrada(tabela_t *tabela, char *valor);
 void inserir_entrada(tabela_t *tabela, entrada_t *entrada);
 
 void print_tabela(tabela_t *tabela);

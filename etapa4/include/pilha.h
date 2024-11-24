@@ -12,7 +12,7 @@ typedef struct Pilha
 pilha_t *criar_pilha(tabela_t *tabela);
 void destruir_pilha(pilha_t *topo);
 
-int buscar(pilha_t *topo, char *valor);
+entrada_t *buscar(pilha_t *topo, char *valor);
 void empilhar(pilha_t **topo, tabela_t *tabela);
 void desempilhar(pilha_t **topo);
 

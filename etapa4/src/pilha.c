@@ -35,18 +35,18 @@ void destruir_pilha(pilha_t *topo)
     }
 }
 
-// provavelmente passar entrada em vez de valor
-int buscar(pilha_t *topo, char *valor)
+entrada_t *buscar(pilha_t *topo, char *valor)
 {
     if (topo != NULL) {
         pilha_t *aux = topo;
         while (aux != NULL) {
-            if (buscar_entrada(aux->tabela, valor) == 1) return 1;
+            entrada_t *ret = buscar_entrada(aux->tabela, valor);
+            if (ret != NULL) return ret;
             aux = aux->proximo;
         }
     } 
 
-    return 0;
+    return NULL;
 }
 
 void empilhar(pilha_t **topo, tabela_t *tabela)
