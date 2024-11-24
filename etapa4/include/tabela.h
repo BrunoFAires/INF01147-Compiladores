@@ -11,6 +11,7 @@ typedef enum TipoSimbolo
 {
     INT,
     FLOAT,
+    FUNCAO,
     PLACEHOLDER
 } simbolo_t;
 

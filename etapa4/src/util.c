@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "util.h"
-#include "asd.h"
+#include "errors.h"
+#include "lex_value.h"
 
 #define CALL "call"
 
@@ -25,15 +26,17 @@ void yyerror(char const *mensagem)
 
 void exporta(void *arvore)
 {
-    if (arvore == NULL) {
+    if (arvore == NULL)
+    {
         return;
     }
-    
-    asd_tree_t *tree = (asd_tree_t *) arvore;
+
+    asd_tree_t *tree = (asd_tree_t *)arvore;
     fprintf(stdout, "%p [label=\"%s\"]; \n", tree, tree->label);
-    
+
     int i = 0;
-    for (i = 0; i < tree->number_of_children; i++) {
+    for (i = 0; i < tree->number_of_children; i++)
+    {
         fprintf(stdout, "%p, %p\n", tree, tree->children[i]);
         exporta(tree->children[i]);
     }
@@ -54,7 +57,8 @@ char *call_funcao(char *nomeFuncao)
     size_t tamanhoFinal = strlen(CALL) + 1 + strlen(nomeFuncao) + 1;
     char *nomeFinal = malloc(tamanhoFinal);
 
-    if (nomeFinal == NULL) {
+    if (nomeFinal == NULL)
+    {
         return NULL;
     }
 
@@ -63,7 +67,74 @@ char *call_funcao(char *nomeFuncao)
     return nomeFinal;
 }
 
+void atribuir_tipo(tabela_t *tabela, simbolo_t type)
+{
+    for (int i = 0; i < tabela->num_entradas; i++)
+    {
+        if (tabela->entradas[i]->tipo_simbolo == PLACEHOLDER)
+        {
+            tabela->entradas[i]->tipo_simbolo = type;
+        }
+    }
+}
 
-char *get_type(){
+void verificar_uso_expressao(asd_tree_t *nodo, pilha_t *pilha)
+{
+    char *identificador = remover_prefixo_call(nodo->label);
+
+    entrada_t *entrada = buscar(pilha, identificador);
+
+    if (entrada == NULL) // assumindo que a verificacao de definição em um escopo já foi feito. Não dá para usar o valor do type de lex_value_t visto que nesse ponto ele já não existe mais.
+    {
+        return;
+    }
+
+    if (nodo->number_of_children != 0)
+    {
+        if (entrada->natureza == NAT_IDENTIFICADOR)
+        {
+            printf("Uso indevido do identificador da variável '%s', linha: %d. ", identificador, entrada->linha); // adicionar a linha na árvore
+            exit(ERR_VARIABLE);
+        }
+    }
+    else if (nodo->number_of_children == 0)
+    {
+        if (entrada->natureza == NAT_FUNCAO)
+        {
+            printf("Uso indevido do identificador da função '%s', linha: %d. ", identificador, entrada->linha); // adicionar a linha na árvore já que essa representa onde o identificador foi definido.
+            exit(ERR_FUNCTION);
+        }
+    }
+}
+
+void verificar_uso_identificador(pilha_t *pilha, char *identificador)
+{
+    entrada_t *entrada = buscar(pilha, identificador);
     
+    if (entrada == NULL) // assumindo que a verificacao de definição em um escopo já foi feito. Não dá para usar o valor do type de lex_value_t visto que nesse ponto ele já não existe mais.
+    {
+        return;
+    }
+
+    if (entrada->natureza == NAT_FUNCAO)
+    {
+        printf("Uso indevido do identificador da variável '%s', linha: %d. ", identificador, entrada->linha); // adicionar a linha na árvore
+        exit(ERR_FUNCTION);
+    }
+}
+
+char *remover_prefixo_call(char *valor)
+{
+    char *prefixo = "call ";
+    char *inicio = strstr(valor, prefixo);
+
+    if (inicio != NULL)
+    {
+        size_t tamanho_sem_prefixo = strlen(valor) - strlen(prefixo);
+        char *resultado = (char *)malloc(tamanho_sem_prefixo + 1);
+        strcpy(resultado, valor + strlen(prefixo));
+        return resultado;
+    }
+
+    return valor;
 }
