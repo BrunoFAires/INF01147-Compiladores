@@ -3,6 +3,7 @@
 %define parse.error verbose
 
 %{
+
 #include "pilha.h"
 #include "errors.h"
 
@@ -103,17 +104,15 @@ listaDeFuncao: funcaoComParametros fechaEscopo listaDeFuncao { $$ = $1; asd_add_
 
 funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopo parametrosFuncao '>' tipo blocoComandoFuncao
 { 
-    $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7);
-    verificar_dupla_declaracao(pilha->tabela, $1, NAT_FUNCAO);
     inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $7->type, $1->value));
+    $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7);
     lex_value_free($1);
     asd_free($6);
 };
 funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopo '>' tipo blocoComandoFuncao
 { 
-    $$ = asd_new($1->value); if($6 != NULL) asd_add_child($$, $6);
-    verificar_dupla_declaracao(pilha->tabela, $1, NAT_FUNCAO);
     inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $5->type, $1->value));
+    $$ = asd_new($1->value); if($6 != NULL) asd_add_child($$, $6);
     lex_value_free($1);
     asd_free($5);
 };
@@ -124,7 +123,6 @@ parametrosFuncao: listaParametrosFuncao { $$ = NULL; };
 listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo 
 {  
     $$ = NULL;
-    verificar_dupla_declaracao(pilha->tabela, $1, NAT_IDENTIFICADOR); 
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, $4->type, $1->value));
     lex_value_free($1);
     asd_free($4);
@@ -132,7 +130,6 @@ listaParametrosFuncao: TK_IDENTIFICADOR '<''-' tipo
 | TK_IDENTIFICADOR '<''-' tipo TK_OC_OR listaParametrosFuncao 
 { 
     $$ = NULL;
-    verificar_dupla_declaracao(pilha->tabela, $1, NAT_IDENTIFICADOR);
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, $4->type, $1->value));
     lex_value_free($1);
     asd_free($4);
@@ -167,7 +164,6 @@ listaDeComandoSimples: comandosSimples';' listaDeComandoSimples
 | var';' listaDeComandoSimples
 {
     $$ = $1; if ($$ != NULL) { if($3 != NULL) asd_add_child(asd_get_last_node($$, MIN_NUM_CHILDREN_VAR), $3); } else $$ = $3;
-
 }
 | comandosSimples';'
 {
@@ -188,30 +184,26 @@ var: tipo listaVar
 listaVar: TK_IDENTIFICADOR
 { 
     $$ = NULL;
-    verificar_dupla_declaracao(pilha->tabela, $1, NAT_IDENTIFICADOR);
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
     lex_value_free($1);
 } // Não gera AST
 | TK_IDENTIFICADOR TK_OC_LE literal  
 { 
-    $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value));
-    verificar_dupla_declaracao(pilha->tabela, $1, NAT_IDENTIFICADOR);
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+    $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value));
     lex_value_free($1);
     lex_value_free($3);
 }
 | TK_IDENTIFICADOR ',' listaVar 
 { 
     $$ = $3;
-    verificar_dupla_declaracao(pilha->tabela, $1, NAT_IDENTIFICADOR);
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
     lex_value_free($1);
 }
 | TK_IDENTIFICADOR TK_OC_LE literal',' listaVar 
 { 
-    $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); if($5 != NULL)asd_add_child($$, $5);
-    verificar_dupla_declaracao(pilha->tabela, $1, NAT_IDENTIFICADOR); 
     inserir_entrada(pilha->tabela, criar_entrada($1->lineno, NAT_IDENTIFICADOR, PLACEHOLDER, $1->value));
+    $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value)); if($5 != NULL)asd_add_child($$, $5);
     lex_value_free($1);
     lex_value_free($3);
 }
@@ -219,10 +211,10 @@ listaVar: TK_IDENTIFICADOR
 
 atribuicao: TK_IDENTIFICADOR '=' expressao //Verificar se existe antes de atribuir
 {
+    $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3);
     verificar_declaracao(pilha, $1, NAT_IDENTIFICADOR);
     verificar_uso_identificador(pilha, $1->value);
     verificar_uso_expressao($3, pilha);
-    $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3);
     lex_value_free($1);
 };
 
@@ -238,53 +230,56 @@ listaArgumento: expressao { $$ = $1; }
 
 retorno: TK_PR_RETURN expressao
 {
-    verificar_uso_expressao($2, pilha);
     $$ = asd_new("return"); asd_add_child($$, $2);
+    verificar_uso_expressao($2, pilha);
 };
 
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
 {
-    verificar_uso_expressao($3, pilha);
     $$ = asd_new("if"); asd_add_child($$, $3); if ($5 != NULL) asd_add_child($$, $5); if ($7 != NULL) asd_add_child($$, $7);
+    verificar_uso_expressao($3, pilha);
 }
 | TK_PR_IF '(' expressao ')' blocoComando
 {
-    verificar_uso_expressao($3, pilha);
     $$ = asd_new("if"); asd_add_child($$, $3); if ($5 != NULL) asd_add_child($$, $5);
+    verificar_uso_expressao($3, pilha);
 }
 ;
 
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
 {
-    verificar_uso_expressao($3, pilha);
     $$ = asd_new("while"); asd_add_child($$, $3); if ($5 != NULL) asd_add_child($$, $5);
+    verificar_uso_expressao($3, pilha);
 };
 
 expressao: expressao TK_OC_OR exp1 
 {
-    verificar_uso_expressao($1, pilha);
     $$ = asd_new("|"); asd_add_child($$, $1); asd_add_child($$, $3);
+    verificar_uso_expressao($1, pilha);
 }
 | exp1 { $$ = $1; }
 
 exp1: exp1 TK_OC_AND exp2
 {
-    verificar_uso_expressao($1, pilha);
     $$ = asd_new("&"); asd_add_child($$, $1); asd_add_child($$, $3);
+    verificar_uso_expressao($1, pilha);
 }
 | exp2 { $$ = $1; verificar_uso_expressao($1, pilha);}
 
 exp2: exp2 TK_OC_NE exp3
 {
-    verificar_uso_expressao($1, pilha);
     $$ = asd_new("!="); asd_add_child($$, $1); asd_add_child($$, $3);
+    verificar_uso_expressao($1, pilha);
 }
 | exp2 TK_OC_EQ exp3
 {
     $$ = asd_new("=="); asd_add_child($$, $1); asd_add_child($$, $3);
     verificar_uso_expressao($1, pilha);
 }
-| exp3 { $$ = $1; verificar_uso_expressao($1, pilha);}
+| exp3 
+{ 
+    $$ = $1; verificar_uso_expressao($1, pilha); 
+}
 ;
 
 exp3: exp3 TK_OC_GE exp4
@@ -320,7 +315,10 @@ exp4: exp4 '-' termo
     $$ = asd_new("+"); asd_add_child($$, $1); asd_add_child($$, $3);
     verificar_uso_expressao($1, pilha);
 }
-| termo { $$ = $1; verificar_uso_expressao($1, pilha);}
+| termo 
+{ 
+    $$ = $1; verificar_uso_expressao($1, pilha);
+}
 ;
 
 termo:  termo '%' fator
@@ -328,7 +326,7 @@ termo:  termo '%' fator
     $$ = asd_new("%"); asd_add_child($$, $1); asd_add_child($$, $3);
     verificar_uso_expressao($1, pilha);
 }
-    |  termo '/' fator
+|  termo '/' fator
 {
     $$ = asd_new("/"); asd_add_child($$, $1); asd_add_child($$, $3);
     verificar_uso_expressao($1, pilha);
@@ -338,12 +336,16 @@ termo:  termo '%' fator
     $$ = asd_new("*"); asd_add_child($$, $1); asd_add_child($$, $3);
     verificar_uso_expressao($1, pilha);
 }
-|  fator {$$ = $1; verificar_uso_expressao($1, pilha);}
+|  fator 
+{ 
+    $$ = $1; verificar_uso_expressao($1, pilha); 
+}
 ;
-fator: '!' fator { verificar_uso_expressao($2, pilha); $$ = asd_new("!"); asd_add_child($$, $2); }
-| '-' fator { verificar_uso_expressao($2, pilha); $$ = asd_new("-"); asd_add_child($$, $2); }
+
+fator: '!' fator { $$ = asd_new("!"); asd_add_child($$, $2); verificar_uso_expressao($2, pilha); }
+| '-' fator { $$ = asd_new("-"); asd_add_child($$, $2); verificar_uso_expressao($2, pilha); }
 | '(' expressao ')' { $$ = $2; verificar_uso_expressao($2, pilha); }
-| TK_IDENTIFICADOR { verificar_declaracao(pilha, $1, NAT_IDENTIFICADOR); $$ = asd_new($1->value); lex_value_free($1); }
+| TK_IDENTIFICADOR { $$ = asd_new($1->value); verificar_declaracao(pilha, $1, NAT_IDENTIFICADOR); lex_value_free($1); }
 | TK_LIT_INT { $$ = asd_new($1->value); lex_value_free($1); }
 | TK_LIT_FLOAT { $$ = asd_new($1->value); lex_value_free($1); }
 | chamadaFuncao { $$ = $1; }

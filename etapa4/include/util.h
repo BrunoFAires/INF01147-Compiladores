@@ -2,7 +2,6 @@
 #define _UTIL_H_
 
 #include "pilha.h"
-#include "tabela.h"
 #include "lex_value.h"
 #include "asd.h"
 
@@ -16,6 +15,5 @@ void verificar_uso_expressao(asd_tree_t *nodo, pilha_t *pilha);
 void verificar_uso_identificador(pilha_t *pilha, char *identificador);
 char *remover_prefixo_call(char *valor);
 void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natureza);
-void verificar_dupla_declaracao(tabela_t *tabela, lex_value_t *lex_value, natureza_t natureza);
 
 #endif //_UTIL_H_

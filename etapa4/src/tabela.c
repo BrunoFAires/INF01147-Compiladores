@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "tabela.h"
 #include "macros.h"
+#include "errors.h"
 
 entrada_t *criar_entrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, char *valor)
 {
@@ -90,6 +91,11 @@ entrada_t *buscar_entrada(tabela_t *tabela, char *valor)
 void inserir_entrada(tabela_t *tabela, entrada_t *entrada)
 {
     if (tabela != NULL && entrada != NULL) {
+        entrada_t *ret = buscar_entrada(tabela, entrada->valor);
+        if (ret != NULL) {
+            fprintf(stderr, "semantic error: identificador %s (%s) na linha %d já declarado na linha %d\n", entrada->valor, entrada->natureza == NAT_FUNCAO ? "função" : "variável", entrada->linha, ret->linha);
+            exit(ERR_DECLARED);
+        }
         tabela->num_entradas++;
         tabela->entradas = realloc(tabela->entradas, tabela->num_entradas * sizeof(entrada_t *));   
         tabela->entradas[tabela->num_entradas-1] = entrada;

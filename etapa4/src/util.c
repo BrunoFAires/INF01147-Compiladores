@@ -92,7 +92,7 @@ void verificar_uso_expressao(asd_tree_t *nodo, pilha_t *pilha)
     {
         if (entrada->natureza == NAT_IDENTIFICADOR)
         {
-            printf("Uso indevido do identificador da variável '%s', linha: %d. ", identificador, entrada->linha); // adicionar a linha na árvore
+            fprintf(stderr, "Uso indevido do identificador da variável '%s', linha: %d.\n", identificador, entrada->linha); // adicionar a linha na árvore
             exit(ERR_VARIABLE);
         }
     }
@@ -100,12 +100,13 @@ void verificar_uso_expressao(asd_tree_t *nodo, pilha_t *pilha)
     {
         if (entrada->natureza == NAT_FUNCAO)
         {
-            printf("Uso indevido do identificador da função '%s', linha: %d. ", identificador, entrada->linha); // adicionar a linha na árvore já que essa representa onde o identificador foi definido.
+            fprintf(stderr, "Uso indevido do identificador da função '%s', linha: %d.\n", identificador, entrada->linha); // adicionar a linha na árvore já que essa representa onde o identificador foi definido.
             exit(ERR_FUNCTION);
         }
     }
 }
 
+// pegar lineno quando é chamada
 void verificar_uso_identificador(pilha_t *pilha, char *identificador)
 {
     entrada_t *entrada = buscar(pilha, identificador);
@@ -117,7 +118,7 @@ void verificar_uso_identificador(pilha_t *pilha, char *identificador)
 
     if (entrada->natureza == NAT_FUNCAO)
     {
-        printf("Uso indevido do identificador da variável '%s', linha: %d. ", identificador, entrada->linha); // adicionar a linha na árvore
+        fprintf(stderr, "Uso indevido do identificador da variável '%s', linha: %d.\n", identificador, entrada->linha); // adicionar a linha na árvore
         exit(ERR_FUNCTION);
     }
 }
@@ -143,14 +144,5 @@ void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natu
     if (buscar(topo, lex_value->value) == NULL) {
         fprintf(stderr, "semantic error: identificador %s (%s) na linha %d não declarado\n", lex_value->value, natureza == NAT_FUNCAO ? "função" : "variável", lex_value->lineno);
         exit(ERR_UNDECLARED);
-    }
-}
-
-void verificar_dupla_declaracao(tabela_t *tabela, lex_value_t *lex_value, natureza_t natureza)
-{
-    entrada_t *ret = buscar_entrada(tabela, lex_value->value);
-    if (ret != NULL) {
-        fprintf(stderr, "semantic error: identificador %s (%s) na linha %d já declarado na linha %d\n", lex_value->value, natureza == NAT_FUNCAO ? "função" : "variável", lex_value->lineno, ret->linha);
-        exit(ERR_DECLARED);
     }
 }
