@@ -61,7 +61,7 @@ char *call_funcao(char *nomeFuncao)
         return NULL;
     }
 
-    snprintf(nomeFinal, tamanhoFinal, "%s %s", CALL, nomeFuncao); // qual é o motivo disso?
+    snprintf(nomeFinal, tamanhoFinal, "%s %s", CALL, nomeFuncao);
 
     return nomeFinal;
 }
@@ -77,67 +77,28 @@ void atribuir_tipo(tabela_t *tabela, simbolo_t type)
     }
 }
 
-void verificar_uso_expressao(asd_tree_t *nodo, pilha_t *pilha)
+void verificar_uso_identificador(pilha_t *pilha, lex_value_t *identificador)
 {
-    char *identificador = remover_prefixo_call(nodo->label);
-
-    entrada_t *entrada = buscar(pilha, identificador);
-
-    if (entrada == NULL) // assumindo que a verificacao de definição em um escopo já foi feito. Não dá para usar o valor do type de lex_value_t visto que nesse ponto ele já não existe mais.
-    {
-        return;
-    }
-
-    if (nodo->number_of_children != 0)
-    {
-        if (entrada->natureza == NAT_IDENTIFICADOR)
-        {
-            fprintf(stderr, "Uso indevido do identificador da variável '%s', linha: %d.\n", identificador, entrada->linha); // adicionar a linha na árvore
-            exit(ERR_VARIABLE);
-        }
-    }
-    else if (nodo->number_of_children == 0)
-    {
-        if (entrada->natureza == NAT_FUNCAO)
-        {
-            fprintf(stderr, "Uso indevido do identificador da função '%s', linha: %d.\n", identificador, entrada->linha); // adicionar a linha na árvore já que essa representa onde o identificador foi definido.
-            exit(ERR_FUNCTION);
-        }
-    }
-}
-
-// pegar lineno quando é chamada
-void verificar_uso_identificador(pilha_t *pilha, char *identificador)
-{
-    entrada_t *entrada = buscar(pilha, identificador);
-    
-    if (entrada == NULL) // assumindo que a verificacao de definição em um escopo já foi feito. Não dá para usar o valor do type de lex_value_t visto que nesse ponto ele já não existe mais.
-    {
-        return;
-    }
+    entrada_t *entrada = buscar(pilha, identificador->value);
 
     if (entrada->natureza == NAT_FUNCAO)
     {
-        fprintf(stderr, "Uso indevido do identificador da variável '%s', linha: %d.\n", identificador, entrada->linha); // adicionar a linha na árvore
+        fprintf(stderr, "Uso indevido do identificador da função '%s', linha: %d.\n", identificador->value, identificador->lineno);
         exit(ERR_FUNCTION);
     }
 }
 
-char *remover_prefixo_call(char *valor)
+void verificar_uso_identificador_funcao(pilha_t *pilha, lex_value_t *identificador)
 {
-    char *prefixo = "call ";
-    char *inicio = strstr(valor, prefixo);
+    entrada_t *entrada = buscar(pilha, identificador->value);
 
-    if (inicio != NULL)
+    if (entrada->natureza == NAT_IDENTIFICADOR)
     {
-        size_t tamanho_sem_prefixo = strlen(valor) - strlen(prefixo);
-        char *resultado = (char *)malloc(tamanho_sem_prefixo + 1);
-        strcpy(resultado, valor + strlen(prefixo));
-        return resultado;
+        fprintf(stderr, "Uso indevido do identificador da variável '%s', linha: %d.\n", identificador->value, identificador->lineno); 
+        exit(ERR_VARIABLE);
     }
-
-    return valor;
 }
+
 
 void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natureza)
 {

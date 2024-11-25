@@ -11,8 +11,8 @@ void yyerror(char const *mensagem);
 void exporta (void *arvore);
 char *call_funcao(char *nomeFuncao);
 void atribuir_tipo(tabela_t *tabela, simbolo_t type);
-void verificar_uso_expressao(asd_tree_t *nodo, pilha_t *pilha);
-void verificar_uso_identificador(pilha_t *pilha, char *identificador);
+void verificar_uso_identificador(pilha_t *pilha, lex_value_t *identificador);
+void verificar_uso_identificador_funcao(pilha_t *pilha, lex_value_t *identificador);
 char *remover_prefixo_call(char *valor);
 void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natureza);
 
