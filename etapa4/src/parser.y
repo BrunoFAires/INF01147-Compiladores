@@ -209,7 +209,7 @@ listaVar: TK_IDENTIFICADOR
 }
 ;
 
-atribuicao: TK_IDENTIFICADOR '=' expressao //Verificar se existe antes de atribuir
+atribuicao: TK_IDENTIFICADOR '=' expressao 
 {
     $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3);
     verificar_declaracao(pilha, $1, NAT_IDENTIFICADOR);
@@ -224,8 +224,15 @@ chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')'
     char *str_call_funcao = call_funcao($1->value); $$ = asd_new(str_call_funcao); asd_add_child($$, $3); free(str_call_funcao);
     lex_value_free($1);
 };
-listaArgumento: expressao { $$ = $1; } 
-| expressao',' listaArgumento { $$ = $1; asd_add_child($$, $3); }
+listaArgumento: expressao 
+{ 
+    $$ = $1; 
+} 
+| expressao',' listaArgumento 
+{ 
+    $$ = $1; 
+    asd_add_child($$, $3); 
+}
 ;
 
 retorno: TK_PR_RETURN expressao
@@ -325,13 +332,39 @@ termo:  termo '%' fator
 }
 ;
 
-fator: '!' fator { $$ = asd_new("!"); asd_add_child($$, $2); }
-| '-' fator { $$ = asd_new("-"); asd_add_child($$, $2); }
-| '(' expressao ')' { $$ = $2;}
-| TK_IDENTIFICADOR { $$ = asd_new($1->value); verificar_declaracao(pilha, $1, NAT_IDENTIFICADOR); verificar_uso_identificador(pilha, $1); lex_value_free($1); }
-| TK_LIT_INT { $$ = asd_new($1->value); lex_value_free($1); }
-| TK_LIT_FLOAT { $$ = asd_new($1->value); lex_value_free($1); }
-| chamadaFuncao { $$ = $1; }
+fator: '!' fator 
+{ 
+    $$ = asd_new("!"); asd_add_child($$, $2); 
+}
+| '-' fator 
+{ 
+    $$ = asd_new("-"); asd_add_child($$, $2); 
+}
+| '(' expressao ')' 
+{   
+    $$ = $2;
+}
+| TK_IDENTIFICADOR 
+{ 
+    $$ = asd_new($1->value); 
+    verificar_declaracao(pilha, $1, NAT_IDENTIFICADOR); 
+    verificar_uso_identificador(pilha, $1); 
+    lex_value_free($1); 
+}
+| TK_LIT_INT 
+{ 
+    $$ = asd_new($1->value); 
+    lex_value_free($1); 
+}
+| TK_LIT_FLOAT 
+{ 
+    $$ = asd_new($1->value); 
+    lex_value_free($1); 
+}
+| chamadaFuncao 
+{ 
+    $$ = $1; 
+}
 ;
 
 %%

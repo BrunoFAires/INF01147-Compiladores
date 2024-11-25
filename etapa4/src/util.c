@@ -83,7 +83,7 @@ void verificar_uso_identificador(pilha_t *pilha, lex_value_t *identificador)
 
     if (entrada->natureza == NAT_FUNCAO)
     {
-        fprintf(stderr, "Uso indevido do identificador da função '%s', linha: %d.\n", identificador->value, identificador->lineno);
+        fprintf(stderr, "semantic error: uso indevido do identificador '%s' (função) na linha %d, declarado na linha %d\n", identificador->value, identificador->lineno, entrada->linha);
         exit(ERR_FUNCTION);
     }
 }
@@ -94,16 +94,15 @@ void verificar_uso_identificador_funcao(pilha_t *pilha, lex_value_t *identificad
 
     if (entrada->natureza == NAT_IDENTIFICADOR)
     {
-        fprintf(stderr, "Uso indevido do identificador da variável '%s', linha: %d.\n", identificador->value, identificador->lineno); 
+        fprintf(stderr, "semantic error: uso indevido do identificador '%s' (variável) na linha %d, declarado na linha %d\n", identificador->value, identificador->lineno, entrada->linha);
         exit(ERR_VARIABLE);
     }
 }
 
-
 void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natureza)
 {
     if (buscar(topo, lex_value->value) == NULL) {
-        fprintf(stderr, "semantic error: identificador %s (%s) na linha %d não declarado\n", lex_value->value, natureza == NAT_FUNCAO ? "função" : "variável", lex_value->lineno);
+        fprintf(stderr, "semantic error: identificador '%s' (%s) na linha %d não declarado\n", lex_value->value, natureza == NAT_FUNCAO ? "função" : "variável", lex_value->lineno);
         exit(ERR_UNDECLARED);
     }
 }
