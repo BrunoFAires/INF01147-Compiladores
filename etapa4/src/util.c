@@ -3,6 +3,7 @@
 #include <string.h>
 #include "util.h"
 #include "asd.h"
+#include "errors.h"
 
 #define CALL "call"
 
@@ -20,7 +21,7 @@ void increment_line_number()
 
 void yyerror(char const *mensagem)
 {
-    fprintf(stderr, "%s at line %d\n", mensagem, get_line_number());
+    fprintf(stderr, "%s na linha %d\n", mensagem, get_line_number());
 }
 
 void exporta(void *arvore)
@@ -63,7 +64,19 @@ char *call_funcao(char *nomeFuncao)
     return nomeFinal;
 }
 
+void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natureza)
+{
+    if (buscar(topo, lex_value->value) == NULL) {
+        fprintf(stderr, "semantic error: identificador %s (%s) na linha %d não declarado\n", lex_value->value, natureza == NAT_FUNCAO ? "função" : "variável", lex_value->lineno);
+        exit(ERR_UNDECLARED);
+    }
+}
 
-char *get_type(){
-    
+void verificar_dupla_declaracao(tabela_t *tabela, lex_value_t *lex_value, natureza_t natureza)
+{
+    entrada_t *ret = buscar_entrada(tabela, lex_value->value);
+    if (ret != NULL) {
+        fprintf(stderr, "semantic error: identificador %s (%s) na linha %d já declarado na linha %d\n", lex_value->value, natureza == NAT_FUNCAO ? "função" : "variável", lex_value->lineno, ret->linha);
+        exit(ERR_DECLARED);
+    }
 }

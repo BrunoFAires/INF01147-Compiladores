@@ -64,4 +64,4 @@ etapa[1-7]/etapa[1-7]
 **/tests/*
 
 # VS Code
-.vscode/*
+**/.vscode/*

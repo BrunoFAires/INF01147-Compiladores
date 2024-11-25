@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include "tabela.h"
 #include "macros.h"
-#include "errors.h"
 
-// TODO: dar free no lex_value depois de copiar dados
 entrada_t *criar_entrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, char *valor)
 {
     entrada_t *ret = NULL;
