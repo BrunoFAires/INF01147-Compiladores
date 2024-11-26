@@ -106,3 +106,22 @@ void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natu
         exit(ERR_UNDECLARED);
     }
 }
+
+simbolo_t inferir_tipo(simbolo_t tipo1, simbolo_t tipo2)
+{
+    if (tipo1 == tipo2) return tipo1;
+    if (tipo1 == FLOAT || tipo2 == FLOAT) return FLOAT;
+
+    return PLACEHOLDER;
+}
+
+simbolo_t buscar_tipo(pilha_t *topo, char *valor)
+{
+    entrada_t *entrada = buscar(topo, valor);
+
+    if (entrada == NULL) {
+        return PLACEHOLDER;
+    }
+
+    return entrada->tipo_simbolo;
+}

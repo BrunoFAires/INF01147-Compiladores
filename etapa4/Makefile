@@ -1,6 +1,6 @@
 IDIR = include
 CC = gcc
-CFLAGS = -I$(IDIR) -DENABLE_LOGS # -Wall -g
+CFLAGS = -I$(IDIR) # -DENABLE_LOGS -Wall -g
 ODIR = build
 SDIR = src
 LOGDIR = logs
