@@ -102,17 +102,16 @@ listaDeFuncao: funcaoComParametros fechaEscopo listaDeFuncao { $$ = $1; asd_add_
 |  funcaoSemParametros fechaEscopo { $$ = $1; }
 ;
 
-funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopo parametrosFuncao '>' tipo blocoComandoFuncao
+funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopo parametrosFuncao '>' tipo { inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $6->type, $1->value));} blocoComandoFuncao
 { 
-    inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $6->type, $1->value));
-    $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7);
+
+    $$ = asd_new($1->value); if($8 != NULL) asd_add_child($$, $8);
     lex_value_free($1);
     asd_free($6);
 };
-funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopo '>' tipo blocoComandoFuncao
+funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopo '>' tipo {inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $5->type, $1->value));} blocoComandoFuncao
 { 
-    inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $5->type, $1->value));
-    $$ = asd_new($1->value); if($6 != NULL) asd_add_child($$, $6);
+    $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7);
     lex_value_free($1);
     asd_free($5);
 };
