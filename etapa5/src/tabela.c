@@ -97,6 +97,7 @@ void inserir_entrada(tabela_t *tabela, entrada_t *entrada)
             exit(ERR_DECLARED);
         }
         tabela->num_entradas++;
+        entrada->deslocamento = tabela->num_entradas; // Com as simplificações, considera-se que todas as entradas tem tamanho 1
         tabela->entradas = realloc(tabela->entradas, tabela->num_entradas * sizeof(entrada_t *));   
         tabela->entradas[tabela->num_entradas-1] = entrada;
     } else {

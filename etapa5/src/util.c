@@ -7,6 +7,7 @@
 #define CALL "call"
 
 int line_number = 1;
+int num_rotulo = 0, num_temp = 0;
 
 int get_line_number()
 {
@@ -124,4 +125,18 @@ simbolo_t buscar_tipo(pilha_t *topo, char *valor)
     }
 
     return entrada->tipo_simbolo;
+}
+
+char *gera_string(char identificador){
+    int num = identificador == 'r' ? num_temp : num_rotulo;
+
+    int tamanho = snprintf(NULL, 0, "r%d", num) + 1;
+    char *resultado = (char *) malloc(tamanho * sizeof(char));
+    if (resultado == NULL) {
+        printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
+        return NULL;
+    }
+    sprintf(resultado, "%c%d", identificador, num);
+
+    return resultado;
 }

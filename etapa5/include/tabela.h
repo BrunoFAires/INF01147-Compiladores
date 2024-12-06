@@ -9,7 +9,7 @@ typedef enum Natureza
 
 typedef enum TipoSimbolo
 {
-    INT,
+    INT = 4,
     FLOAT,
     FUNCAO,
     PLACEHOLDER
@@ -21,6 +21,7 @@ typedef struct Entrada
     natureza_t natureza;
     simbolo_t tipo_simbolo;
     char *valor;
+    int deslocamento;
 } entrada_t;
 
 typedef struct Tabela
