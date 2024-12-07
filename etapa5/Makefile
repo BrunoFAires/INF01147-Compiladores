@@ -1,6 +1,6 @@
 IDIR = include
 CC = gcc
-CFLAGS = -I$(IDIR) # -DENABLE_LOGS -Wall -g
+CFLAGS = -I$(IDIR) -DENABLE_LOGS #  -Wall -g
 ODIR = build
 SDIR = src
 LOGDIR = logs
@@ -14,12 +14,12 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: dirs clean run
 
-etapa4: $(OBJ)
+etapa5: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-run: etapa4
-	@echo Executando etapa 4...
-	./etapa4
+run: etapa5
+	@echo Executando etapa 5...
+	./etapa5
 
 # Bison
 B_DEPS = $(SDIR)/parser.y $(SDIR)/util.c $(IDIR)/util.h $(SDIR)/asd.c $(IDIR)/asd.h $(SDIR)/lex_value.c $(IDIR)/lex_value.h $(SDIR)/pilha.c $(IDIR)/pilha.h $(SDIR)/tabela.c $(IDIR)/tabela.h $(IDIR)/macros.h $(SDIR)/instrucao.c $(IDIR)/instrucao.h

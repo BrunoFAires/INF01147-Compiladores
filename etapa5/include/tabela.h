@@ -1,6 +1,9 @@
 #ifndef TABELA_H
 #define TABELA_H
 
+#define TAM_ENTRADA 4
+#define DESLOC_PLACEHOLDER -1
+
 typedef enum Natureza
 {
     NAT_IDENTIFICADOR,
@@ -28,6 +31,7 @@ typedef struct Tabela
 {
     entrada_t **entradas;
     int num_entradas;
+    int inicio_deslocamento;
 } tabela_t;
 
 entrada_t *criar_entrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo, char *valor);

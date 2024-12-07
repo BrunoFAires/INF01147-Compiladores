@@ -14,6 +14,7 @@ entrada_t *criar_entrada(int linha, natureza_t natureza, simbolo_t tipo_simbolo,
         ret->natureza = natureza;
         ret->tipo_simbolo = tipo_simbolo;
         ret->valor = strdup(valor);
+        ret->deslocamento = DESLOC_PLACEHOLDER;
     } else {
         printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
     }
@@ -39,6 +40,7 @@ tabela_t *criar_tabela(entrada_t *entrada)
         ret->entradas = (entrada_t **) calloc(1, sizeof(entrada_t *));
         ret->entradas[0] = entrada;
         ret->num_entradas = 1;
+        ret->inicio_deslocamento = 0;
     } else {
         printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
     }
@@ -96,8 +98,12 @@ void inserir_entrada(tabela_t *tabela, entrada_t *entrada)
             fprintf(stderr, "semantic error: identificador '%s' (%s) na linha %d já declarado na linha %d\n", entrada->valor, entrada->natureza == NAT_FUNCAO ? "função" : "variável", entrada->linha, ret->linha);
             exit(ERR_DECLARED);
         }
+        if (tabela->num_entradas == 0) {
+            entrada->deslocamento = tabela->inicio_deslocamento;
+        } else {
+            entrada->deslocamento = tabela->entradas[tabela->num_entradas-1]->deslocamento + TAM_ENTRADA;
+        }
         tabela->num_entradas++;
-        entrada->deslocamento = tabela->num_entradas; // Com as simplificações, considera-se que todas as entradas tem tamanho 1
         tabela->entradas = realloc(tabela->entradas, tabela->num_entradas * sizeof(entrada_t *));   
         tabela->entradas[tabela->num_entradas-1] = entrada;
     } else {
@@ -126,7 +132,7 @@ void print_tabela(tabela_t *tabela)
                     break;
             }
             char *natureza = tabela->entradas[i]->natureza == NAT_FUNCAO ? "FUNCAO" : "IDENTIFICADOR";
-            printf("Linha: %3d\tValor: %s\tTipo: %s\tNatureza: %s\n", tabela->entradas[i]->linha, tabela->entradas[i]->valor, tipo, natureza);
+            printf("Linha: %3d\tValor: %s\tTipo: %s\tNatureza: %s\tDeslocamento: %d\n", tabela->entradas[i]->linha, tabela->entradas[i]->valor, tipo, natureza, tabela->entradas[i]->deslocamento);
         }
     } else {
         printf("Erro: %s recebeu parâmetro tabela = %p.\n", __FUNCTION__, tabela);

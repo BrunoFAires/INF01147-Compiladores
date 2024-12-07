@@ -27,7 +27,6 @@ extern pilha_t *pilha;
 %union {
     lex_value_t *lex_value;
     asd_tree_t *tree;
-
 }
 
 %token TK_PR_INT
@@ -76,7 +75,7 @@ extern pilha_t *pilha;
 %type<tree> fator
 
 %%
-inicio: abreEscopoGlobal programa fechaEscopoGlobal //abertura do escopo global
+inicio: abreEscopoGlobal programa fechaEscopoGlobal
 
 abreEscopoGlobal: /* vazio */ 
 { 
@@ -85,9 +84,16 @@ abreEscopoGlobal: /* vazio */
 }
 fechaEscopoGlobal: /* vazio */ { destruir_pilha(pilha); }
 
-abreEscopo: /* vazio */ 
+abreEscopoFuncao: /* vazio */ 
 {
     tabela_t *tabela = criar_tabela_vazia(); 
+    tabela->inicio_deslocamento = 0;
+    empilhar(&pilha, tabela);
+}
+abreEscopoInterno: /* vazio */ 
+{
+    tabela_t *tabela = criar_tabela_vazia();
+    tabela->inicio_deslocamento = pilha->tabela->entradas[pilha->tabela->num_entradas-1]->deslocamento + TAM_ENTRADA;
     empilhar(&pilha, tabela);
 }
 fechaEscopo: /* vazio */ { desempilhar(&pilha); }
@@ -102,14 +108,14 @@ listaDeFuncao: funcaoComParametros fechaEscopo listaDeFuncao { $$ = $1; asd_add_
 |  funcaoSemParametros fechaEscopo { $$ = $1; }
 ;
 
-funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopo parametrosFuncao '>' tipo { inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $6->type, $1->value));} blocoComandoFuncao
+funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopoFuncao parametrosFuncao '>' tipo { inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $6->type, $1->value)); } blocoComandoFuncao
 { 
-
     $$ = asd_new($1->value); if($8 != NULL) asd_add_child($$, $8);
     lex_value_free($1);
     asd_free($6);
 };
-funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopo '>' tipo {inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $5->type, $1->value));} blocoComandoFuncao
+
+funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopoFuncao '>' tipo { inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $5->type, $1->value)); } blocoComandoFuncao
 { 
     $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7);
     lex_value_free($1);
@@ -139,12 +145,12 @@ literal: TK_LIT_INT { $$ = $1; }
 | TK_LIT_FLOAT { $$ = $1; }
 ;
 
-blocoComandoFuncao: '{' listaDeComandoSimples '}' { $$ = $2; }
-| '{' /* vazio */ fechaEscopo '}' { $$ = NULL; } // Não gera AST 
+blocoComandoFuncao: '{' listaDeComandoSimples /* { LOG("PILHA FUNÇÃO"); print_pilha(pilha); } */ '}' { $$ = $2; }
+| '{' /* vazio */ '}' { $$ = NULL; } // Não gera AST 
 ;
 
-blocoComando: '{' abreEscopo listaDeComandoSimples fechaEscopo '}' { $$ = $3; } 
-| '{' abreEscopo /* vazio */ fechaEscopo '}' { $$ = NULL; } // Não gera AST 
+blocoComando: '{' abreEscopoInterno listaDeComandoSimples /* { LOG("PILHA BC"); print_pilha(pilha); } */ fechaEscopo '}' { $$ = $3; } 
+| '{' abreEscopoInterno /* vazio */ fechaEscopo '}' { $$ = NULL; } // Não gera AST 
 ;
 
 comandosSimples: blocoComando { $$ = $1; }
