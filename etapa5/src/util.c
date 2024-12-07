@@ -140,3 +140,11 @@ char *gera_string(char identificador){
 
     return resultado;
 }
+
+void libera_se_alocado(void *ponteiro)
+{
+    if (ponteiro != NULL) {
+        free(ponteiro);
+        ponteiro = NULL;
+    }
+}

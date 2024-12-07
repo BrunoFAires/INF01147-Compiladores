@@ -1,12 +1,14 @@
 #ifndef INSTRUCAO_H
 #define INSTRUCAO_H
 
+#define MAX_LEN 50
+
 typedef struct Instrucao
 {
-    char *mnem;
-    char *arg1;
-    char *arg2;
-    char *arg3;
+    char mnem[MAX_LEN];
+    char arg1[MAX_LEN];
+    char arg2[MAX_LEN];
+    char arg3[MAX_LEN];
 } instrucao_t;
 
 typedef struct ListaInstrucao
@@ -14,7 +16,6 @@ typedef struct ListaInstrucao
     instrucao_t **instrucoes;
     int num_instrucoes;
 } lista_instrucao_t;
-
 
 void destruir_lista(lista_instrucao_t *lista);
 lista_instrucao_t *criar_lista(instrucao_t *instrucao);

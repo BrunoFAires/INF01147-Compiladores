@@ -18,5 +18,6 @@ void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natu
 simbolo_t inferir_tipo(simbolo_t tipo1, simbolo_t tipo2);
 simbolo_t buscar_tipo(pilha_t *topo, char *valor);
 char *gera_string(char identificador);
+void libera_se_alocado(void *ponteiro);
 
 #endif //_UTIL_H_
