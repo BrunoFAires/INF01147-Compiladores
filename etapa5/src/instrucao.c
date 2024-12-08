@@ -42,24 +42,20 @@ lista_instrucao_t *concatenar_listas(lista_instrucao_t *lista1, lista_instrucao_
         LOG("concatenando listas %p e %p", lista1, lista2);
         int novo_tamanho = lista1->num_instrucoes + lista2->num_instrucoes;
         instrucao_t **concat = (instrucao_t **) malloc(sizeof(instrucao_t *) * novo_tamanho);
-
         if (concat == NULL) {
-            printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
+            printf("Erro: %s não conseguiu alocar memória para vetor de instruções.\n", __FUNCTION__);
             return NULL;
         }
 
         memcpy(concat, lista1->instrucoes, sizeof(instrucao_t *) * lista1->num_instrucoes);
         memcpy(concat + lista1->num_instrucoes, lista2->instrucoes, sizeof(instrucao_t *) * lista2->num_instrucoes);
 
-        // Por algum motivo, dar free aqui dá erro 'free(): double free detected in tcache 2' ao liberar a lista concatenada
-        // e os mnemonicos da lista concatenada ficam com lixo de memória :/
-        // destruir_lista(lista1);
-        // destruir_lista(lista2);
+        lista1 = NULL, lista2 = NULL;
 
         lista_instrucao_t *ret = NULL;
         ret = (lista_instrucao_t *) calloc(1, sizeof(lista_instrucao_t));
         if (ret == NULL) {
-            printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
+            printf("Erro: %s não conseguiu alocar memória para retorno.\n", __FUNCTION__);
             free(concat);
             return NULL;
         }
@@ -81,10 +77,9 @@ instrucao_t *gera_instrucao(char *mnem, char *arg1, char *arg2, char *arg3)
     if(instrucao != NULL) {
         LOG("criando instrucao %s %s %s %s", mnem, arg1, arg2, arg3);
         strncpy(instrucao->mnem, mnem, MAX_LEN);
-        strncpy(instrucao->arg1, arg1, MAX_LEN);
-        strncpy(instrucao->arg2, arg2, MAX_LEN);
-        if (arg3 != NULL)
-            strncpy(instrucao->arg3, arg3, MAX_LEN);
+        if (arg1 != NULL) strncpy(instrucao->arg1, arg1, MAX_LEN);
+        if (arg2 != NULL) strncpy(instrucao->arg2, arg2, MAX_LEN);
+        if (arg3 != NULL) strncpy(instrucao->arg3, arg3, MAX_LEN);
     } else {
         printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
     }
@@ -117,13 +112,46 @@ void print_codigo(lista_instrucao_t *lista)
 {
     if (lista != NULL) {
         for (int i = 0 ; i < lista->num_instrucoes; i++) {
-            printf("%-*s%-*s%-*s%-*s\n", 
-                    LARG_MNEM, lista->instrucoes[i]->mnem, 
-                    LARG_ARG,  lista->instrucoes[i]->arg1, 
-                    LARG_ARG,  lista->instrucoes[i]->arg2, 
-                    LARG_ARG,  lista->instrucoes[i]->arg3);
+            print_instrucao(lista->instrucoes[i]);
         }
     } else {
         printf("Erro: %s recebeu parâmetro lista = %p.\n", __FUNCTION__, lista);
     }
+}
+
+void print_instrucao(instrucao_t *inst) 
+{
+    int num_operandos = calcula_num_operandos(inst);
+    switch (num_operandos)
+    {
+    case 1:
+        fprintf(stdout, "%-*s => %-*s\n", 
+            LARG_MNEM, inst->mnem, 
+            LARG_ARG,  inst->arg1);
+        break;
+    case 2:
+        fprintf(stdout, "%-*s %-*s => %-*s\n", 
+            LARG_MNEM, inst->mnem, 
+            LARG_ARG,  inst->arg1,
+            LARG_ARG,  inst->arg2);
+        break;
+    case 3:
+        fprintf(stdout, "%-*s %-*s, %-*s => %-*s\n", 
+            LARG_MNEM, inst->mnem, 
+            LARG_ARG,  inst->arg1,
+            LARG_ARG,  inst->arg2, 
+            LARG_ARG,  inst->arg3);
+        break;
+    default:
+        break;
+    }    
+}
+
+int calcula_num_operandos(instrucao_t *inst)
+{
+    int num_operandos = 0;
+    if (inst->arg1[0] != '\0') num_operandos++;
+    if (inst->arg2[0] != '\0') num_operandos++;
+    if (inst->arg3[0] != '\0') num_operandos++;
+    return num_operandos;
 }

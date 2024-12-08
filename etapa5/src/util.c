@@ -42,12 +42,12 @@ void exporta(void *arvore)
     }
 
     // Libera memória ao final da exportação
-    free(tree->children);
-    tree->children = NULL;
-    free(tree->label);
-    tree->label = NULL;
-    free(tree);
-    tree = NULL;
+    // free(tree->children);
+    // tree->children = NULL;
+    // free(tree->label);
+    // tree->label = NULL;
+    // free(tree);
+    // tree = NULL;
 
     return;
 }
@@ -127,7 +127,7 @@ simbolo_t buscar_tipo(pilha_t *topo, char *valor)
     return entrada->tipo_simbolo;
 }
 
-char *gera_string(char identificador){
+char *_gera_string(char identificador){
     int num = identificador == 'r' ? num_temp : num_rotulo;
 
     int tamanho = snprintf(NULL, 0, "r%d", num) + 1;
@@ -139,6 +139,20 @@ char *gera_string(char identificador){
     sprintf(resultado, "%c%d", identificador, num);
 
     return resultado;
+}
+
+char *gera_temp()
+{
+    char *temp = _gera_string('r');
+    num_temp++;
+    return temp;
+}
+
+char *gera_rotulo()
+{
+    char *rot = _gera_string('L');
+    num_rotulo++;
+    return rot;
 }
 
 void libera_se_alocado(void *ponteiro)

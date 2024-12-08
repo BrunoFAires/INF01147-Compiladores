@@ -2,12 +2,15 @@
 #define _ARVORE_H_
 
 #include "tabela.h"
+#include "instrucao.h"
 
 typedef struct asd_tree {
   char *label;
   int number_of_children;
   simbolo_t type;
   struct asd_tree **children;
+  lista_instrucao_t *codigo;
+  char *local;
 } asd_tree_t;
 
 /*

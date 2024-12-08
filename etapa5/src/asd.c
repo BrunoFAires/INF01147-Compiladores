@@ -13,6 +13,8 @@ asd_tree_t *asd_new(const char *label)
     ret->type = PLACEHOLDER;
     ret->number_of_children = 0;
     ret->children = NULL;
+    ret->codigo = NULL;
+    ret->local = NULL;
   }
   return ret;
 }
@@ -26,6 +28,8 @@ asd_tree_t *asd_new_type(simbolo_t type)
     ret->label = NULL;
     ret->number_of_children = 0;
     ret->children = NULL;
+    ret->codigo = NULL;
+    ret->local = NULL;
   }
   return ret;
 }
@@ -39,6 +43,10 @@ void asd_free(asd_tree_t *tree)
     }
     free(tree->children);
     free(tree->label);
+    if (tree->local != NULL)
+      free(tree->local);
+    if (tree->codigo != NULL)
+      destruir_lista(tree->codigo);
     free(tree);
   }else{
     printf("Erro: %s recebeu parâmetro tree = %p.\n", __FUNCTION__, tree);

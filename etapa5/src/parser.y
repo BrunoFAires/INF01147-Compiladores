@@ -5,7 +5,6 @@
 %{
 
 #include "pilha.h"
-#include "errors.h"
 
 int yylex(void);
 void yyerror (char const *mensagem);

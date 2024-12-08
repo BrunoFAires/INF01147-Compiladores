@@ -25,6 +25,8 @@ instrucao_t *gera_instrucao(char *mnem, char *arg1, char *arg2, char *arg3);
 void destruir_instrucao(instrucao_t *instrucao);
 void inserir_instrucao(lista_instrucao_t *lista, instrucao_t *instrucao);
 
+int calcula_num_operandos(instrucao_t *inst);
+void print_instrucao(instrucao_t *inst);
 void print_codigo(lista_instrucao_t *lista);
 
 #endif
