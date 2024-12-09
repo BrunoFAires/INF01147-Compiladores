@@ -127,30 +127,28 @@ simbolo_t buscar_tipo(pilha_t *topo, char *valor)
     return entrada->tipo_simbolo;
 }
 
-char *_gera_string(char identificador){
-    int num = identificador == 'r' ? num_temp : num_rotulo;
-
-    int tamanho = snprintf(NULL, 0, "r%d", num) + 1;
+char *_gera_string(char identificador, int *num){
+    int tamanho = snprintf(NULL, 0, "r%d", *num) + 1;
     char *resultado = (char *) malloc(tamanho * sizeof(char));
     if (resultado == NULL) {
         printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
         return NULL;
     }
-    sprintf(resultado, "%c%d", identificador, num);
+    sprintf(resultado, "%c%d", identificador, *num);
 
     return resultado;
 }
 
 char *gera_temp()
 {
-    char *temp = _gera_string('r');
+    char *temp = _gera_string('r', &num_temp);
     num_temp++;
     return temp;
 }
 
 char *gera_rotulo()
 {
-    char *rot = _gera_string('L');
+    char *rot = _gera_string('L', &num_rotulo);
     num_rotulo++;
     return rot;
 }

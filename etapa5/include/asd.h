@@ -9,7 +9,7 @@ typedef struct asd_tree {
   int number_of_children;
   simbolo_t type;
   struct asd_tree **children;
-  lista_instrucao_t *codigo;
+  codigo_t *codigo;
   char *local;
 } asd_tree_t;
 

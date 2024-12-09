@@ -3,30 +3,32 @@
 #include <string.h>
 #include "instrucao.h"
 #include "macros.h"
+#include "asd.h"
+#include "util.h"
 
 #define LARG_MNEM 10
 #define LARG_ARG  5
 
-void destruir_lista(lista_instrucao_t *lista)
+void destruir_codigo(codigo_t *codigo)
 {
-    if (lista != NULL) {
-        for (int i = 0; i < lista->num_instrucoes; i++) {
-            destruir_instrucao(lista->instrucoes[i]);
+    if (codigo != NULL) {
+        for (int i = 0; i < codigo->num_instrucoes; i++) {
+            destruir_instrucao(codigo->instrucoes[i]);
         }
-        free(lista->instrucoes);
-        free(lista);
+        free(codigo->instrucoes);
+        free(codigo);
     } else {
-        printf("Erro: %s recebeu parâmetro lista = %p.\n", __FUNCTION__, lista);
+        printf("Erro: %s recebeu parâmetro codigo = %p.\n", __FUNCTION__, codigo);
     }
 }
 
-lista_instrucao_t *criar_lista(instrucao_t *instrucao)
+codigo_t *gera_codigo(char *mnem, char *arg1, char *arg2, char *arg3)
 {
-    lista_instrucao_t *ret = NULL;
-    ret = calloc(1, sizeof(lista_instrucao_t));
+    codigo_t *ret = NULL;
+    ret = calloc(1, sizeof(codigo_t));
     if (ret != NULL) {
         ret->instrucoes = (instrucao_t **) calloc(1, sizeof(instrucao_t *));
-        ret->instrucoes[0] = instrucao;
+        ret->instrucoes[0] = gera_instrucao(mnem, arg1, arg2, arg3);
         ret->num_instrucoes = 1;
     }
     else {
@@ -36,24 +38,23 @@ lista_instrucao_t *criar_lista(instrucao_t *instrucao)
     return ret;
 }
 
-lista_instrucao_t *concatenar_listas(lista_instrucao_t *lista1, lista_instrucao_t *lista2)
+codigo_t *concatena_codigo(codigo_t *codigo1, codigo_t *codigo2)
 {
-    if (lista1 != NULL && lista2 != NULL) {
-        LOG("concatenando listas %p e %p", lista1, lista2);
-        int novo_tamanho = lista1->num_instrucoes + lista2->num_instrucoes;
+    if (codigo1 != NULL && codigo2 != NULL) {
+        int novo_tamanho = codigo1->num_instrucoes + codigo2->num_instrucoes;
         instrucao_t **concat = (instrucao_t **) malloc(sizeof(instrucao_t *) * novo_tamanho);
         if (concat == NULL) {
             printf("Erro: %s não conseguiu alocar memória para vetor de instruções.\n", __FUNCTION__);
             return NULL;
         }
 
-        memcpy(concat, lista1->instrucoes, sizeof(instrucao_t *) * lista1->num_instrucoes);
-        memcpy(concat + lista1->num_instrucoes, lista2->instrucoes, sizeof(instrucao_t *) * lista2->num_instrucoes);
+        memcpy(concat, codigo1->instrucoes, sizeof(instrucao_t *) * codigo1->num_instrucoes);
+        memcpy(concat + codigo1->num_instrucoes, codigo2->instrucoes, sizeof(instrucao_t *) * codigo2->num_instrucoes);
 
-        lista1 = NULL, lista2 = NULL;
+        codigo1 = NULL, codigo2 = NULL;
 
-        lista_instrucao_t *ret = NULL;
-        ret = (lista_instrucao_t *) calloc(1, sizeof(lista_instrucao_t));
+        codigo_t *ret = NULL;
+        ret = (codigo_t *) calloc(1, sizeof(codigo_t));
         if (ret == NULL) {
             printf("Erro: %s não conseguiu alocar memória para retorno.\n", __FUNCTION__);
             free(concat);
@@ -64,7 +65,7 @@ lista_instrucao_t *concatenar_listas(lista_instrucao_t *lista1, lista_instrucao_
 
         return ret;
     } else {
-        printf("Erro: %s recebeu parâmetro lista1 = %p / lista2 = %p.\n", __FUNCTION__, lista1, lista2);
+        printf("Erro: %s recebeu parâmetro codigo1 = %p / codigo2 = %p.\n", __FUNCTION__, codigo1, codigo2);
     }
 
     return NULL;
@@ -75,7 +76,6 @@ instrucao_t *gera_instrucao(char *mnem, char *arg1, char *arg2, char *arg3)
     instrucao_t *instrucao = NULL;
     instrucao = calloc(1, sizeof(instrucao_t));
     if(instrucao != NULL) {
-        LOG("criando instrucao %s %s %s %s", mnem, arg1, arg2, arg3);
         strncpy(instrucao->mnem, mnem, MAX_LEN);
         if (arg1 != NULL) strncpy(instrucao->arg1, arg1, MAX_LEN);
         if (arg2 != NULL) strncpy(instrucao->arg2, arg2, MAX_LEN);
@@ -96,51 +96,50 @@ void destruir_instrucao(instrucao_t *instrucao)
     }
 }
 
-void inserir_instrucao(lista_instrucao_t *lista, instrucao_t *instrucao)
+void inserir_instrucao(codigo_t *codigo, instrucao_t *instrucao)
 {
-    if (lista != NULL && instrucao != NULL) {
-        LOG("inserindo instrucao %s %s %s %s", instrucao->mnem, instrucao->arg1, instrucao->arg2, instrucao->arg3);
-        lista->num_instrucoes++;
-        lista->instrucoes = (instrucao_t **) realloc(lista->instrucoes, lista->num_instrucoes * sizeof(instrucao_t *));  
-        lista->instrucoes[lista->num_instrucoes-1] = instrucao;
+    if (codigo != NULL && instrucao != NULL) {
+        codigo->num_instrucoes++;
+        codigo->instrucoes = (instrucao_t **) realloc(codigo->instrucoes, codigo->num_instrucoes * sizeof(instrucao_t *));  
+        codigo->instrucoes[codigo->num_instrucoes-1] = instrucao;
     } else {
-        printf("Erro: %s recebeu parâmetro tabela = %p / instrução = %p.\n", __FUNCTION__, lista, instrucao);
+        printf("Erro: %s recebeu parâmetro tabela = %p / instrução = %p.\n", __FUNCTION__, codigo, instrucao);
     }
 }
 
-void print_codigo(lista_instrucao_t *lista) 
+void exporta_codigo(codigo_t *codigo) 
 {
-    if (lista != NULL) {
-        for (int i = 0 ; i < lista->num_instrucoes; i++) {
-            print_instrucao(lista->instrucoes[i]);
+    if (codigo != NULL) {
+        for (int i = 0 ; i < codigo->num_instrucoes; i++) {
+            exporta_instrucao(codigo->instrucoes[i]);
         }
     } else {
-        printf("Erro: %s recebeu parâmetro lista = %p.\n", __FUNCTION__, lista);
+        printf("Erro: %s recebeu parâmetro codigo = %p.\n", __FUNCTION__, codigo);
     }
 }
 
-void print_instrucao(instrucao_t *inst) 
+void exporta_instrucao(instrucao_t *inst) 
 {
     int num_operandos = calcula_num_operandos(inst);
     switch (num_operandos)
     {
     case 1:
-        fprintf(stdout, "%-*s => %-*s\n", 
+        fprintf(stdout, "%-*s => %s\n", 
             LARG_MNEM, inst->mnem, 
-            LARG_ARG,  inst->arg1);
+            inst->arg1);
         break;
     case 2:
-        fprintf(stdout, "%-*s %-*s => %-*s\n", 
+        fprintf(stdout, "%-*s %s => %s\n", 
             LARG_MNEM, inst->mnem, 
-            LARG_ARG,  inst->arg1,
-            LARG_ARG,  inst->arg2);
+            inst->arg1,
+            inst->arg2);
         break;
     case 3:
-        fprintf(stdout, "%-*s %-*s, %-*s => %-*s\n", 
+        fprintf(stdout, "%-*s %s, %s => %s\n", 
             LARG_MNEM, inst->mnem, 
-            LARG_ARG,  inst->arg1,
-            LARG_ARG,  inst->arg2, 
-            LARG_ARG,  inst->arg3);
+            inst->arg1,
+            inst->arg2, 
+            inst->arg3);
         break;
     default:
         break;
@@ -154,4 +153,22 @@ int calcula_num_operandos(instrucao_t *inst)
     if (inst->arg2[0] != '\0') num_operandos++;
     if (inst->arg3[0] != '\0') num_operandos++;
     return num_operandos;
+}
+
+retorno_gera_t *gera_codigo_aritmetico(char *mnem, void *nodo1, void *nodo2, void *nodo3)
+{
+    asd_tree_t *nodo_asd_1 = (asd_tree_t *) nodo1;
+    asd_tree_t *nodo_asd_2 = (asd_tree_t *) nodo2;
+    asd_tree_t *nodo_asd_3 = (asd_tree_t *) nodo3;
+    char *local = gera_temp();
+    codigo_t *codigo = concatena_codigo(concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo), gera_codigo(mnem, nodo_asd_1->local, nodo_asd_2->local, local));
+    retorno_gera_t *ret = (retorno_gera_t *) malloc(sizeof(retorno_gera_t));
+    if (ret == NULL) {
+        printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
+        return NULL;
+    }
+    ret->codigo = codigo;
+    ret->local = local;
+
+    return ret;
 }

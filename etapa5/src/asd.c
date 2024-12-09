@@ -21,16 +21,8 @@ asd_tree_t *asd_new(const char *label)
 
 asd_tree_t *asd_new_type(simbolo_t type)
 {
-  asd_tree_t *ret = NULL;
-  ret = calloc(1, sizeof(asd_tree_t));
-  if (ret != NULL){
-    ret->type = type;
-    ret->label = NULL;
-    ret->number_of_children = 0;
-    ret->children = NULL;
-    ret->codigo = NULL;
-    ret->local = NULL;
-  }
+  asd_tree_t *ret = asd_new("type");
+  ret->type = type;
   return ret;
 }
 
@@ -46,7 +38,7 @@ void asd_free(asd_tree_t *tree)
     if (tree->local != NULL)
       free(tree->local);
     if (tree->codigo != NULL)
-      destruir_lista(tree->codigo);
+      destruir_codigo(tree->codigo);
     free(tree);
   }else{
     printf("Erro: %s recebeu parâmetro tree = %p.\n", __FUNCTION__, tree);

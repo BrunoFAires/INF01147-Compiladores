@@ -21,6 +21,7 @@ extern pilha_t *pilha;
     #include "pilha.h"
     #include "tabela.h"
     #include "macros.h"
+    #include "instrucao.h"
 }
 
 %union {
@@ -344,11 +345,17 @@ exp4: exp4 '-' termo
 {
     $$ = asd_new("-"); asd_add_child($$, $1); asd_add_child($$, $3);
     $$->type = inferir_tipo($1->type, $3->type);
+    retorno_gera_t *retorno = gera_codigo_aritmetico("sub", $1, $3, $$);
+    $$->local = retorno->local;
+    $$->codigo = retorno->codigo;
 }
 | exp4 '+' termo
 {
     $$ = asd_new("+"); asd_add_child($$, $1); asd_add_child($$, $3);
     $$->type = inferir_tipo($1->type, $3->type);
+    retorno_gera_t *retorno = gera_codigo_aritmetico("add", $1, $3, $$);
+    $$->local = retorno->local;
+    $$->codigo = retorno->codigo;
 }
 | termo 
 { 
@@ -365,11 +372,17 @@ termo:  termo '%' fator
 {
     $$ = asd_new("/"); asd_add_child($$, $1); asd_add_child($$, $3);
     $$->type = inferir_tipo($1->type, $3->type);
+    retorno_gera_t *retorno = gera_codigo_aritmetico("div", $1, $3, $$);
+    $$->local = retorno->local;
+    $$->codigo = retorno->codigo;
 }
 |  termo '*' fator
 {
     $$ = asd_new("*"); asd_add_child($$, $1); asd_add_child($$, $3);
     $$->type = inferir_tipo($1->type, $3->type);
+    retorno_gera_t *retorno = gera_codigo_aritmetico("mult", $1, $3, $$);
+    $$->local = retorno->local;
+    $$->codigo = retorno->codigo;
 }
 |  fator 
 { 
@@ -397,13 +410,15 @@ fator: '!' fator
     verificar_uso_identificador(pilha, $1);
     $$ = asd_new($1->value); 
     $$->type = buscar_tipo(pilha, $1->value);
-    lex_value_free($1); 
+    lex_value_free($1);
 }
 | TK_LIT_INT 
 { 
     $$ = asd_new($1->value);
     $$->type = INT;
-    lex_value_free($1); 
+    $$->local = gera_temp();
+    $$->codigo = gera_codigo("loadI", $1->value, $$->local, NULL);
+    lex_value_free($1);
 }
 | TK_LIT_FLOAT 
 { 
