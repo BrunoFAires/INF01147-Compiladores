@@ -205,6 +205,7 @@ listaVar: TK_IDENTIFICADOR
     $$ = asd_new("<="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, asd_new($3->value));
     lex_value_free($1);
     lex_value_free($3);
+    exporta_codigo($3->codigo);
 }
 | TK_IDENTIFICADOR ',' listaVar 
 { 
@@ -231,7 +232,12 @@ atribuicao: TK_IDENTIFICADOR '=' expressao
     verificar_uso_identificador(pilha, $1);
     $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3);
     $$->type = buscar_tipo(pilha, $1->value);
-    lex_value_free($1);
+
+    char *local = gera_temp();
+    
+    // $$->codigo = concatena_codigo($3->codigo, gera_codigo(NULL, "load", local, $3->local, NULL, 0, 0));
+    // $$->local = local;
+    // lex_value_free($1);
 };
 
 chamadaFuncao: TK_IDENTIFICADOR '(' listaArgumento ')' 
@@ -345,7 +351,7 @@ exp4: exp4 '-' termo
 {
     $$ = asd_new("-"); asd_add_child($$, $1); asd_add_child($$, $3);
     $$->type = inferir_tipo($1->type, $3->type);
-    retorno_gera_t *retorno = gera_codigo_aritmetico("sub", $1, $3, $$);
+    retorno_gera_t *retorno = gera_codigo_aritmetico(NULL, "sub", $1, $3, $$); //TODO gerar instrução 'vazia'(somente com o label)
     $$->local = retorno->local;
     $$->codigo = retorno->codigo;
 }
@@ -353,7 +359,7 @@ exp4: exp4 '-' termo
 {
     $$ = asd_new("+"); asd_add_child($$, $1); asd_add_child($$, $3);
     $$->type = inferir_tipo($1->type, $3->type);
-    retorno_gera_t *retorno = gera_codigo_aritmetico("add", $1, $3, $$);
+    retorno_gera_t *retorno = gera_codigo_aritmetico(NULL, "add", $1, $3, $$);
     $$->local = retorno->local;
     $$->codigo = retorno->codigo;
 }
@@ -372,7 +378,7 @@ termo:  termo '%' fator
 {
     $$ = asd_new("/"); asd_add_child($$, $1); asd_add_child($$, $3);
     $$->type = inferir_tipo($1->type, $3->type);
-    retorno_gera_t *retorno = gera_codigo_aritmetico("div", $1, $3, $$);
+    retorno_gera_t *retorno = gera_codigo_aritmetico(NULL, "div", $1, $3, $$);
     $$->local = retorno->local;
     $$->codigo = retorno->codigo;
 }
@@ -380,7 +386,7 @@ termo:  termo '%' fator
 {
     $$ = asd_new("*"); asd_add_child($$, $1); asd_add_child($$, $3);
     $$->type = inferir_tipo($1->type, $3->type);
-    retorno_gera_t *retorno = gera_codigo_aritmetico("mult", $1, $3, $$);
+    retorno_gera_t *retorno = gera_codigo_aritmetico(NULL, "mult", $1, $3, $$);
     $$->local = retorno->local;
     $$->codigo = retorno->codigo;
 }
@@ -393,12 +399,36 @@ termo:  termo '%' fator
 fator: '!' fator 
 { 
     $$ = asd_new("!"); asd_add_child($$, $2);
+
+    char *lbl1 = gera_rotulo();
+    char *lbl2 = gera_rotulo();
+    char *lbl3 = gera_rotulo();
+
+    codigo_t *codigo = concatena_codigo($2->codigo, gera_codigo(NULL, "cbr", $2->local, lbl1, lbl2, 1, 1));
+
+    instrucao_t *lbl1Codigo = gera_instrucao(lbl1, "loadI", "0", $2->local, NULL, 0, 0);
+    instrucao_t *jump = gera_instrucao(NULL, "jump", lbl3, NULL, NULL, 1, 0);
+    instrucao_t *lbl2Codigo = gera_instrucao(lbl2, "loadI", "1", $2->local, NULL, 0, 0);
+    instrucao_t *lbl3Codigo = gera_instrucao(lbl3, "nop", "", NULL, NULL, 0, 0);
+    
+    inserir_instrucao(codigo, lbl1Codigo);
+    inserir_instrucao(codigo, jump);
+    inserir_instrucao(codigo, lbl2Codigo);
+    inserir_instrucao(codigo, lbl3Codigo);
+
+    $$->codigo = codigo;
+    
+    exporta_codigo(codigo);
+
     $$->type = $2->type;
 }
 | '-' fator 
 { 
     $$ = asd_new("-"); asd_add_child($$, $2);
+    $$->local = gera_temp();
+    $$->codigo = concatena_codigo($2->codigo, gera_codigo(NULL, "multI", $2->local, "-1", $$->local, 0, 0));
     $$->type = $2->type;
+    exporta_codigo($$->codigo);
 }
 | '(' expressao ')' 
 {   
@@ -417,7 +447,7 @@ fator: '!' fator
     $$ = asd_new($1->value);
     $$->type = INT;
     $$->local = gera_temp();
-    $$->codigo = gera_codigo("loadI", $1->value, $$->local, NULL);
+    $$->codigo = gera_codigo(NULL, "loadI", $1->value, $$->local, NULL, 0, 0);
     lex_value_free($1);
 }
 | TK_LIT_FLOAT 
