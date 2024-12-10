@@ -26,14 +26,14 @@ void destruir_codigo(codigo_t *codigo)
     }
 }
 
-codigo_t *gera_codigo(char *lbl, char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int rArg)
+codigo_t *gera_codigo(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int r_arg)
 {
     codigo_t *ret = NULL;
     ret = calloc(1, sizeof(codigo_t));
     if (ret != NULL)
     {
         ret->instrucoes = (instrucao_t **)calloc(1, sizeof(instrucao_t *));
-        ret->instrucoes[0] = gera_instrucao(lbl, mnem, arg1, arg2, arg3, ctrl, rArg);
+        ret->instrucoes[0] = gera_instrucao(mnem, arg1, arg2, arg3, ctrl, r_arg);
         ret->num_instrucoes = 1;
     }
     else
@@ -82,23 +82,22 @@ codigo_t *concatena_codigo(codigo_t *codigo1, codigo_t *codigo2)
     return NULL;
 }
 
-instrucao_t *gera_instrucao(char *lbl, char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int rArg)
+instrucao_t *gera_instrucao(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int r_arg)
 {
     instrucao_t *instrucao = NULL;
     instrucao = calloc(1, sizeof(instrucao_t));
     if (instrucao != NULL)
     {
-        instrucao->ctrl = ctrl;
-        instrucao->rArg = rArg;
+        instrucao->lbl[0] = '\0';
         strncpy(instrucao->mnem, mnem, MAX_LEN);
-        if (lbl != NULL)
-            strncpy(instrucao->lbl, lbl, MAX_LEN);
         if (arg1 != NULL)
             strncpy(instrucao->arg1, arg1, MAX_LEN);
         if (arg2 != NULL)
             strncpy(instrucao->arg2, arg2, MAX_LEN);
         if (arg3 != NULL)
             strncpy(instrucao->arg3, arg3, MAX_LEN);
+        instrucao->ctrl = ctrl;
+        instrucao->r_arg = r_arg;
     }
     else
     {
@@ -108,14 +107,30 @@ instrucao_t *gera_instrucao(char *lbl, char *mnem, char *arg1, char *arg2, char 
     return instrucao;
 }
 
+instrucao_t *gera_instrucao_label(char *lbl) 
+{
+    instrucao_t *instrucao = NULL;
+    instrucao = calloc(1, sizeof(instrucao_t));
+    if (instrucao != NULL) {
+        strncpy(instrucao->lbl, lbl, MAX_LEN);
+        // instrucao->mnem[0] = '\0';
+        // instrucao->arg1[0] = '\0';
+        // instrucao->arg2[0] = '\0';
+        // instrucao->arg3[0] = '\0';
+        // instrucao->ctrl = INDIVIDUAL;
+        // instrucao->ctrl = ARG_LEFT;
+    } else {
+        printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
+    }
+
+    return instrucao;
+}
+
 void destruir_instrucao(instrucao_t *instrucao)
 {
-    if (instrucao != NULL)
-    {
+    if (instrucao != NULL) {
         free(instrucao);
-    }
-    else
-    {
+    } else {
         printf("Erro: %s recebeu parâmetro instrução = %p.\n", __FUNCTION__, instrucao);
     }
 }
@@ -136,56 +151,48 @@ void inserir_instrucao(codigo_t *codigo, instrucao_t *instrucao)
 
 void exporta_codigo(codigo_t *codigo)
 {
-    if (codigo != NULL)
-    {
-        for (int i = 0; i < codigo->num_instrucoes; i++)
-        {
+    if (codigo != NULL) {
+        for (int i = 0; i < codigo->num_instrucoes; i++) {
             exporta_instrucao(codigo->instrucoes[i]);
         }
     }
-    else
-    {
+    else {
         printf("Erro: %s recebeu parâmetro codigo = %p.\n", __FUNCTION__, codigo);
     }
 }
 
 void exporta_instrucao(instrucao_t *inst)
 {
+    if (inst->lbl[0] != '\0') {
+        fprintf(stdout, "%s:\n", inst->lbl);
+        return;
+    }
+
+    fprintf(stdout, "%-*s ", LARG_MNEM, inst->mnem);
     int num_operandos = calcula_num_operandos(inst);
     const char *seta = inst->ctrl ? "->" : "=>";
-
-    if (inst->lbl[0] != '\0')
-    {
-        fprintf(stdout, "%s: ", inst->lbl);
-    }
-
-    fprintf(stdout, "%-*s", LARG_MNEM, inst->mnem);
-
     switch (num_operandos)
     {
-    case 0:
-        fprintf(stdout, "\n");
-        break;
-    case 1:
-        fprintf(stdout, " %s %s\n", seta, inst->arg1);
-        break;
-    case 2:
-        fprintf(stdout, " %s %s %s\n", inst->arg1, seta, inst->arg2);
-        break;
-    case 3:
-        if (inst->rArg)
-        {
-            fprintf(stdout, " %s %s %s, %s\n", inst->arg1, seta, inst->arg2, inst->arg3);
+        case 0:
+            fprintf(stdout, "\n");
+            break;
+        case 1:
+            fprintf(stdout, "%s %s\n", seta, inst->arg1);
+            break;
+        case 2:
+            fprintf(stdout, "%s %s %s\n", inst->arg1, seta, inst->arg2);
+            break;
+        case 3:
+            if (inst->r_arg) {
+                fprintf(stdout, "%s %s %s, %s\n", inst->arg1, seta, inst->arg2, inst->arg3);
+            } else {
+                fprintf(stdout, "%s, %s %s %s\n", inst->arg1, inst->arg2, seta, inst->arg3);
+            }
+            break;
+        default:
+            fprintf(stderr, "Erro: número de operandos inválido (%d) em %s\n", num_operandos, inst->mnem);
+            break;
         }
-        else
-        {
-            fprintf(stdout, " %s, %s %s %s\n", inst->arg1, inst->arg2, seta, inst->arg3);
-        }
-        break;
-    default:
-        fprintf(stderr, "Erro: número de operandos inválido (%d)\n", num_operandos);
-        break;
-    }
 }
 
 int calcula_num_operandos(instrucao_t *inst)
@@ -200,13 +207,13 @@ int calcula_num_operandos(instrucao_t *inst)
     return num_operandos;
 }
 
-retorno_gera_t *gera_codigo_aritmetico(char *lbl, char *mnem, void *nodo1, void *nodo2, void *nodo3, int ctrl)
+retorno_gera_t *gera_codigo_aritmetico(char *mnem, void *nodo1, void *nodo2, void *nodo3, int ctrl)
 {
     asd_tree_t *nodo_asd_1 = (asd_tree_t *)nodo1;
     asd_tree_t *nodo_asd_2 = (asd_tree_t *)nodo2;
     asd_tree_t *nodo_asd_3 = (asd_tree_t *)nodo3;
     char *local = gera_temp();
-    codigo_t *codigo = concatena_codigo(concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo), gera_codigo(lbl, mnem, nodo_asd_1->local, nodo_asd_2->local, local, ctrl, 0));
+    codigo_t *codigo = concatena_codigo(concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo), gera_codigo(mnem, nodo_asd_1->local, nodo_asd_2->local, local, ctrl, ARG_LEFT));
     retorno_gera_t *ret = (retorno_gera_t *)malloc(sizeof(retorno_gera_t));
     if (ret == NULL)
     {
