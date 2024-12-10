@@ -40,6 +40,6 @@ int calcula_num_operandos(instrucao_t *inst);
 void exporta_instrucao(instrucao_t *inst);
 void exporta_codigo(codigo_t *codigo);
 
-retorno_gera_t *gera_codigo_aritmetico(char *lbl, char *mnem, void *nodo1, void *nodo2, void *nodo3);
+retorno_gera_t *gera_codigo_aritmetico(char *lbl, char *mnem, void *nodo1, void *nodo2, void *nodo3, int ctrl);
 
 #endif

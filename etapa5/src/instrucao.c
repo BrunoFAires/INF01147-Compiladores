@@ -152,103 +152,38 @@ void exporta_codigo(codigo_t *codigo)
 void exporta_instrucao(instrucao_t *inst)
 {
     int num_operandos = calcula_num_operandos(inst);
-    char seta[2] = "=>";
+    const char *seta = inst->ctrl ? "->" : "=>";
 
-    if (inst->ctrl)
+    if (inst->lbl[0] != '\0')
     {
-        strncpy(seta, "->", 2);
+        fprintf(stdout, "%s: ", inst->lbl);
     }
+
+    fprintf(stdout, "%-*s", LARG_MNEM, inst->mnem);
 
     switch (num_operandos)
     {
     case 0:
-        if (inst->lbl[0] != '\0')
-        {
-            fprintf(stdout, "%s: %-*s\n",
-                    inst->lbl,
-                    LARG_MNEM, inst->mnem);
-            break;
-        }
-        else
-        {
-            fprintf(stdout, "%-*s\n",
-                    LARG_MNEM, inst->mnem);
-            break;
-        }
+        fprintf(stdout, "\n");
+        break;
     case 1:
-        if (inst->lbl[0] != '\0')
-        {
-            fprintf(stdout, "%s: %-*s %s %s\n",
-                    inst->lbl,
-                    LARG_MNEM, inst->mnem,
-                    seta,
-                    inst->arg1);
-            break;
-        }
-        else
-        {
-            fprintf(stdout, "%-*s %s %s\n",
-                    LARG_MNEM, inst->mnem,
-                    seta,
-                    inst->arg1);
-            break;
-        }
+        fprintf(stdout, " %s %s\n", seta, inst->arg1);
+        break;
     case 2:
-        if (inst->lbl[0] != '\0')
-        {
-
-            fprintf(stdout, "%s: %-*s %s %s %s\n",
-                    inst->lbl,
-                    LARG_MNEM, inst->mnem,
-                    inst->arg1,
-                    seta,
-                    inst->arg2);
-            break;
-        }
-        else
-        {
-
-            fprintf(stdout, "%-*s %s %s %s\n",
-                    LARG_MNEM, inst->mnem,
-                    inst->arg1,
-                    seta,
-                    inst->arg2);
-        }
+        fprintf(stdout, " %s %s %s\n", inst->arg1, seta, inst->arg2);
         break;
     case 3:
         if (inst->rArg)
         {
-            fprintf(stdout, "%-*s %s %s %s, %s\n",
-                    LARG_MNEM, inst->mnem,
-                    inst->arg1,
-                    seta,
-                    inst->arg2,
-                    inst->arg3);
+            fprintf(stdout, " %s %s %s, %s\n", inst->arg1, seta, inst->arg2, inst->arg3);
         }
         else
         {
-            if (inst->lbl[0] != '\0')
-            {
-                fprintf(stdout, "%s: %-*s %s, %s %s %s\n",
-                        inst->lbl,
-                        LARG_MNEM, inst->mnem,
-                        inst->arg1,
-                        inst->arg2,
-                        seta,
-                        inst->arg3);
-            }
-            else
-            {
-                fprintf(stdout, "%-*s %s, %s %s %s\n",
-                        LARG_MNEM, inst->mnem,
-                        inst->arg1,
-                        inst->arg2,
-                        seta,
-                        inst->arg3);
-            }
+            fprintf(stdout, " %s, %s %s %s\n", inst->arg1, inst->arg2, seta, inst->arg3);
         }
         break;
     default:
+        fprintf(stderr, "Erro: número de operandos inválido (%d)\n", num_operandos);
         break;
     }
 }
@@ -265,13 +200,13 @@ int calcula_num_operandos(instrucao_t *inst)
     return num_operandos;
 }
 
-retorno_gera_t *gera_codigo_aritmetico(char *lbl, char *mnem, void *nodo1, void *nodo2, void *nodo3)
+retorno_gera_t *gera_codigo_aritmetico(char *lbl, char *mnem, void *nodo1, void *nodo2, void *nodo3, int ctrl)
 {
     asd_tree_t *nodo_asd_1 = (asd_tree_t *)nodo1;
     asd_tree_t *nodo_asd_2 = (asd_tree_t *)nodo2;
     asd_tree_t *nodo_asd_3 = (asd_tree_t *)nodo3;
     char *local = gera_temp();
-    codigo_t *codigo = concatena_codigo(concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo), gera_codigo(lbl, mnem, nodo_asd_1->local, nodo_asd_2->local, local, 0, 0));
+    codigo_t *codigo = concatena_codigo(concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo), gera_codigo(lbl, mnem, nodo_asd_1->local, nodo_asd_2->local, local, ctrl, 0));
     retorno_gera_t *ret = (retorno_gera_t *)malloc(sizeof(retorno_gera_t));
     if (ret == NULL)
     {

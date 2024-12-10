@@ -102,7 +102,8 @@ void verificar_uso_identificador_funcao(pilha_t *pilha, lex_value_t *identificad
 
 void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natureza)
 {
-    if (buscar(topo, lex_value->value) == NULL) {
+    if (buscar(topo, lex_value->value) == NULL)
+    {
         fprintf(stderr, "semantic error: identificador '%s' (%s) na linha %d não declarado\n", lex_value->value, natureza == NAT_FUNCAO ? "função" : "variável", lex_value->lineno);
         exit(ERR_UNDECLARED);
     }
@@ -110,8 +111,10 @@ void verificar_declaracao(pilha_t *topo, lex_value_t *lex_value, natureza_t natu
 
 simbolo_t inferir_tipo(simbolo_t tipo1, simbolo_t tipo2)
 {
-    if (tipo1 == tipo2) return tipo1;
-    if (tipo1 == FLOAT || tipo2 == FLOAT) return FLOAT;
+    if (tipo1 == tipo2)
+        return tipo1;
+    if (tipo1 == FLOAT || tipo2 == FLOAT)
+        return FLOAT;
 
     return PLACEHOLDER;
 }
@@ -120,17 +123,20 @@ simbolo_t buscar_tipo(pilha_t *topo, char *valor)
 {
     entrada_t *entrada = buscar(topo, valor);
 
-    if (entrada == NULL) {
+    if (entrada == NULL)
+    {
         return PLACEHOLDER;
     }
 
     return entrada->tipo_simbolo;
 }
 
-char *_gera_string(char identificador, int *num){
+char *_gera_string(char identificador, int *num)
+{
     int tamanho = snprintf(NULL, 0, "r%d", *num) + 1;
-    char *resultado = (char *) malloc(tamanho * sizeof(char));
-    if (resultado == NULL) {
+    char *resultado = (char *)malloc(tamanho * sizeof(char));
+    if (resultado == NULL)
+    {
         printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
         return NULL;
     }
@@ -155,8 +161,69 @@ char *gera_rotulo()
 
 void libera_se_alocado(void *ponteiro)
 {
-    if (ponteiro != NULL) {
+    if (ponteiro != NULL)
+    {
         free(ponteiro);
         ponteiro = NULL;
     }
+}
+
+void reverse(char* str) {
+    char* start = str;
+    char* end = str;
+
+    while (*end != '\0') {
+        end++;
+    }
+    end--;
+
+    while (start < end) {
+        char temp = *start;
+        *start = *end;
+        *end = temp;
+        start++;
+        end--;
+    }
+}
+
+char* itoa(int num) {
+    int isNegative = 0;
+    int temp = num;
+    int length = 0;
+
+    if (num == 0) {
+        char* result = (char*)malloc(2 * sizeof(char));
+        if (result == NULL) return NULL;
+        result[0] = '0';
+        result[1] = '\0';
+        return result;
+    }
+
+    if (num < 0) {
+        isNegative = 1;
+        num = -num;
+    }
+
+    while (temp != 0) {
+        temp /= 10;
+        length++;
+    }
+    length += isNegative;
+
+    char* result = (char*)malloc((length + 1) * sizeof(char));
+    if (result == NULL) return NULL;                     
+
+    char* ptr = result;
+    do {
+        *ptr++ = (num % 10) + '0'; 
+        num /= 10;
+    } while (num != 0);
+
+    if (isNegative) {
+        *ptr++ = '-';
+    }
+
+    *ptr = '\0';
+    reverse(result);
+    return result;
 }
