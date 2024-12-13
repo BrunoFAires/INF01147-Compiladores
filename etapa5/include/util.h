@@ -20,7 +20,6 @@ simbolo_t buscar_tipo(pilha_t *topo, char *valor);
 char *gera_temp();
 char *gera_rotulo();
 void libera_se_alocado(void *ponteiro);
-
 void reverse(char* str);
 char* itoa(int num);
 

@@ -11,19 +11,17 @@
 
 void destruir_codigo(codigo_t *codigo)
 {
-    if (codigo != NULL)
-    {
-        for (int i = 0; i < codigo->num_instrucoes; i++)
-        {
+    if (codigo != NULL) {
+        for (int i = 0; i < codigo->num_instrucoes; i++) {
             destruir_instrucao(codigo->instrucoes[i]);
         }
         free(codigo->instrucoes);
         free(codigo);
     }
-    else
-    {
-        printf("Erro: %s recebeu parâmetro codigo = %p.\n", __FUNCTION__, codigo);
-    }
+    // else
+    // {
+    //     printf("Erro: %s recebeu parâmetro codigo = %p.\n", __FUNCTION__, codigo);
+    // }
 }
 
 codigo_t *gera_codigo(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int r_arg)

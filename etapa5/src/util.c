@@ -5,6 +5,7 @@
 #include "errors.h"
 
 #define CALL "call"
+#define MAX_ITOA 12
 
 int line_number = 1;
 int num_rotulo = 0, num_temp = 0;
@@ -186,44 +187,55 @@ void reverse(char* str) {
     }
 }
 
-char* itoa(int num) {
-    int isNegative = 0;
-    int temp = num;
-    int length = 0;
+// char* itoa(int num) {
+//     int isNegative = 0;
+//     int temp = num;
+//     int length = 0;
 
-    if (num == 0) {
-        char* result = (char*)malloc(2 * sizeof(char));
-        if (result == NULL) return NULL;
-        result[0] = '0';
-        result[1] = '\0';
-        return result;
+//     if (num == 0) {
+//         char* result = (char*)malloc(2 * sizeof(char));
+//         if (result == NULL) return NULL;
+//         result[0] = '0';
+//         result[1] = '\0';
+//         return result;
+//     }
+
+//     if (num < 0) {
+//         isNegative = 1;
+//         num = -num;
+//     }
+
+//     while (temp != 0) {
+//         temp /= 10;
+//         length++;
+//     }
+//     length += isNegative;
+
+//     char* result = (char*)malloc((length + 1) * sizeof(char));
+//     if (result == NULL) return NULL;                     
+
+//     char* ptr = result;
+//     do {
+//         *ptr++ = (num % 10) + '0'; 
+//         num /= 10;
+//     } while (num != 0);
+
+//     if (isNegative) {
+//         *ptr++ = '-';
+//     }
+
+//     *ptr = '\0';
+//     reverse(result);
+//     return result;
+// }
+
+char *itoa(int num) 
+{
+    char *str = (char *) malloc(MAX_ITOA * sizeof(char));
+    if (str == NULL) {
+        printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
+        return NULL;
     }
-
-    if (num < 0) {
-        isNegative = 1;
-        num = -num;
-    }
-
-    while (temp != 0) {
-        temp /= 10;
-        length++;
-    }
-    length += isNegative;
-
-    char* result = (char*)malloc((length + 1) * sizeof(char));
-    if (result == NULL) return NULL;                     
-
-    char* ptr = result;
-    do {
-        *ptr++ = (num % 10) + '0'; 
-        num /= 10;
-    } while (num != 0);
-
-    if (isNegative) {
-        *ptr++ = '-';
-    }
-
-    *ptr = '\0';
-    reverse(result);
-    return result;
+    sprintf(str, "%d", num);
+    return str;
 }

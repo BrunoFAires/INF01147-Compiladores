@@ -39,9 +39,8 @@ void asd_free(asd_tree_t *tree)
     free(tree->children);
     free(tree->label);
     if (tree->local != NULL)
+    // Obs: tree->codigo é liberado apenas uma vez no nó raiz
       free(tree->local);
-    if (tree->codigo != NULL)
-      // destruir_codigo(tree->codigo); TODO Verificar double free(gerado pela concatenação)
       free(tree);
   }
   else

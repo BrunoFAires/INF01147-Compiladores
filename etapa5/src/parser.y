@@ -229,15 +229,22 @@ atribuicao: TK_IDENTIFICADOR '=' expressao
 {
     verificar_declaracao(pilha, $1, NAT_IDENTIFICADOR);
     verificar_uso_identificador(pilha, $1);
+    entrada_t *entrada = buscar(pilha, $1->value);
     $$ = asd_new("="); asd_add_child($$, asd_new($1->value)); asd_add_child($$, $3);
-    $$->type = buscar_tipo(pilha, $1->value);
+    $$->type = entrada->tipo_simbolo;
 
+    $$->codigo = $3->codigo;
     char *local = gera_temp();
-    entrada_t *entrada = buscar_entrada(pilha->tabela, $1->value);
-    $$->codigo = concatena_codigo($3->codigo, gera_codigo("loadI", local, itoa(entrada->deslocamento), NULL, INDIVIDUAL, ARG_LEFT));
-    $$->local = gera_temp();
-
+    inserir_instrucao($$->codigo, gera_instrucao("loadI", itoa(entrada->deslocamento), local, NULL, INDIVIDUAL, ARG_LEFT));
     inserir_instrucao($$->codigo, gera_instrucao("store", $3->local, local, NULL, INDIVIDUAL, ARG_LEFT));
+
+    // fiquei confuso, não é mem(identificador) = expressao.valor ?
+    // $$->codigo = $3->codigo;
+    // $$->local = gera_temp();
+    // char *local = gera_temp();
+    // inserir_instrucao($$->codigo, gera_instrucao("loadI", itoa(entrada->deslocamento), local, NULL, INDIVIDUAL, ARG_LEFT));
+    // inserir_instrucao($$->codigo, gera_instrucao("store", $3->local, local, NULL, INDIVIDUAL, ARG_LEFT));
+    
     lex_value_free($1);
 };
 
@@ -264,6 +271,7 @@ retorno: TK_PR_RETURN expressao
     $$ = asd_new("return"); asd_add_child($$, $2);
 };
 
+// TODO GEN
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
 {
     $$ = asd_new("if"); 
@@ -279,6 +287,7 @@ condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
 }
 ;
 
+// TODO GEN
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
 {
     $$ = asd_new("while"); 
@@ -452,9 +461,10 @@ fator: '!' fator
 | '-' fator 
 { 
     $$ = asd_new("-"); asd_add_child($$, $2);
-    $$->local = gera_temp();
-    $$->codigo = concatena_codigo($2->codigo, gera_codigo("multI", $2->local, "-1", $$->local, INDIVIDUAL, ARG_LEFT));
     $$->type = $2->type;
+    $$->local = gera_temp();
+    $$->codigo = $2->codigo;
+    inserir_instrucao($$->codigo, gera_instrucao("multI", $2->local, "-1", $$->local, INDIVIDUAL, ARG_LEFT));
 }
 | '(' expressao ')' 
 {   
@@ -464,14 +474,14 @@ fator: '!' fator
 { 
     verificar_declaracao(pilha, $1, NAT_IDENTIFICADOR); 
     verificar_uso_identificador(pilha, $1);
+    entrada_t *entrada = buscar(pilha, $1->value);
     $$ = asd_new($1->value); 
-    $$->type = buscar_tipo(pilha, $1->value);
-
+    $$->type = entrada->tipo_simbolo;
     $$->local = gera_temp();
+
     char *local = gera_temp();
-    entrada_t *entrada = buscar_entrada(pilha->tabela, $1->value);
-    codigo_t *codigo = gera_codigo("loadI", local, itoa(entrada->deslocamento), NULL, INDIVIDUAL, ARG_LEFT);
-    inserir_instrucao(codigo, gera_instrucao("load", local, $$->local, NULL, INDIVIDUAL, ARG_LEFT));
+    codigo_t *codigo = gera_codigo("loadI", local, itoa(entrada->deslocamento), NULL, INDIVIDUAL, ARG_LEFT); // Assumindo que deslocamento sempre será
+    inserir_instrucao(codigo, gera_instrucao("load", local, $$->local, NULL, INDIVIDUAL, ARG_LEFT));         // sobre rfp
     $$->codigo = codigo;
 
     lex_value_free($1);

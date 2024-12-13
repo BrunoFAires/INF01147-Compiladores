@@ -13,8 +13,10 @@ int main(int argc, char **argv)
 {
   int ret = yyparse();
   // print_codigo(arvore->codigo);
-  if (arvore != NULL)
+  if (arvore != NULL) {
+    destruir_codigo(arvore->codigo);
     asd_free(arvore);
+  }
   yylex_destroy();
   return ret;
 }
