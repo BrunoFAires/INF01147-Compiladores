@@ -278,12 +278,40 @@ condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
     asd_add_child($$, $3); 
     if ($5 != NULL) asd_add_child($$, $5); 
     if ($7 != NULL) asd_add_child($$, $7);
+
+    $$->codigo = $3->codigo;
+    char *lbl1 = gera_rotulo();
+    char *lbl2 = gera_rotulo();
+    char *lbl3 = gera_rotulo();
+    inserir_instrucao($$->codigo, gera_instrucao("cbr", $3->local, lbl1, lbl2, CTRL, ARG_RIGHT));
+    inserir_instrucao($$->codigo, gera_instrucao_label(lbl1));
+    if ($5 != NULL) {
+        concatena_codigo($$->codigo, $5->codigo);
+    }
+    inserir_instrucao($$->codigo, gera_instrucao("jump", lbl3, NULL, NULL, CTRL, ARG_LEFT));
+    inserir_instrucao($$->codigo, gera_instrucao_label(lbl2));
+    if ($7 != NULL) {
+        concatena_codigo($$->codigo, $7->codigo);
+    }
+    inserir_instrucao($$->codigo, gera_instrucao("jump", lbl3, NULL, NULL, CTRL, ARG_LEFT));
+    inserir_instrucao($$->codigo, gera_instrucao_label(lbl3));
 }
 | TK_PR_IF '(' expressao ')' blocoComando
 {
     $$ = asd_new("if"); 
     asd_add_child($$, $3); 
     if ($5 != NULL) asd_add_child($$, $5);
+
+    $$->codigo = $3->codigo;
+    char *lbl1 = gera_rotulo();
+    char *lbl2 = gera_rotulo();
+    inserir_instrucao($$->codigo, gera_instrucao("cbr", $3->local, lbl1, lbl2, CTRL, ARG_RIGHT));
+    inserir_instrucao($$->codigo, gera_instrucao_label(lbl1));
+    if ($5 != NULL) {
+        concatena_codigo($$->codigo, $5->codigo);
+    }
+    inserir_instrucao($$->codigo, gera_instrucao("jump", lbl2, NULL, NULL, CTRL, ARG_LEFT));
+    inserir_instrucao($$->codigo, gera_instrucao_label(lbl2));
 }
 ;
 
@@ -293,6 +321,19 @@ repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
     $$ = asd_new("while"); 
     asd_add_child($$, $3); 
     if ($5 != NULL) asd_add_child($$, $5);
+
+    $$->codigo = $3->codigo;
+    char *lbl1 = gera_rotulo();
+    char *lbl2 = gera_rotulo();
+    char *lbl3 = gera_rotulo();
+    inserir_instrucao($$->codigo, gera_instrucao_label(lbl1));
+    inserir_instrucao($$->codigo, gera_instrucao("cbr", $3->local, lbl2, lbl3, CTRL, ARG_RIGHT));
+    inserir_instrucao($$->codigo, gera_instrucao_label(lbl2));
+    if ($5 != NULL) {
+        concatena_codigo($$->codigo, $5->codigo);
+    }
+    inserir_instrucao($$->codigo, gera_instrucao("jump", lbl1, NULL, NULL, CTRL, ARG_LEFT));
+    inserir_instrucao($$->codigo, gera_instrucao_label(lbl3));
 };
 
 expressao: expressao TK_OC_OR exp1 
@@ -480,7 +521,7 @@ fator: '!' fator
     $$->local = gera_temp();
 
     char *local = gera_temp();
-    codigo_t *codigo = gera_codigo("loadI", local, itoa(entrada->deslocamento), NULL, INDIVIDUAL, ARG_LEFT); // Assumindo que deslocamento sempre será
+    codigo_t *codigo = gera_codigo("loadI", itoa(entrada->deslocamento), local, NULL, INDIVIDUAL, ARG_LEFT); // Assumindo que deslocamento sempre será
     inserir_instrucao(codigo, gera_instrucao("load", local, $$->local, NULL, INDIVIDUAL, ARG_LEFT));         // sobre rfp
     $$->codigo = codigo;
 

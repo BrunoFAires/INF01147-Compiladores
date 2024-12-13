@@ -42,43 +42,63 @@ codigo_t *gera_codigo(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, 
     return ret;
 }
 
-codigo_t *concatena_codigo(codigo_t *codigo1, codigo_t *codigo2)
+void concatena_codigo(codigo_t *cod1, codigo_t *cod2)
 {
-    if (codigo1 != NULL && codigo2 != NULL)
-    {
-        int novo_tamanho = codigo1->num_instrucoes + codigo2->num_instrucoes;
-        instrucao_t **concat = (instrucao_t **)malloc(sizeof(instrucao_t *) * novo_tamanho);
-        if (concat == NULL)
-        {
+    // Concatena código de cod2 em cod1
+    if (cod1 != NULL) {
+        if (cod2 == NULL) return;
+
+        int novo_tamanho = cod1->num_instrucoes + cod2->num_instrucoes;
+        cod1->instrucoes = (instrucao_t **) realloc(cod1->instrucoes, novo_tamanho * sizeof(instrucao_t *));
+        if (cod1->instrucoes == NULL) {
             printf("Erro: %s não conseguiu alocar memória para vetor de instruções.\n", __FUNCTION__);
-            return NULL;
+            return;
         }
-
-        memcpy(concat, codigo1->instrucoes, sizeof(instrucao_t *) * codigo1->num_instrucoes);
-        memcpy(concat + codigo1->num_instrucoes, codigo2->instrucoes, sizeof(instrucao_t *) * codigo2->num_instrucoes);
-
-        codigo1 = NULL, codigo2 = NULL;
-
-        codigo_t *ret = NULL;
-        ret = (codigo_t *)calloc(1, sizeof(codigo_t));
-        if (ret == NULL)
-        {
-            printf("Erro: %s não conseguiu alocar memória para retorno.\n", __FUNCTION__);
-            free(concat);
-            return NULL;
-        }
-        ret->instrucoes = concat;
-        ret->num_instrucoes = novo_tamanho;
-
-        return ret;
+        memcpy(cod1->instrucoes + cod1->num_instrucoes, cod2->instrucoes, cod2->num_instrucoes * sizeof(instrucao_t *));
+        cod1->num_instrucoes = novo_tamanho;
+        cod2 = NULL;
+    } else {
+        printf("Erro: %s recebeu parâmetro cod1 = %p.\n", __FUNCTION__, cod1);
     }
-    else
-    {
-        printf("Erro: %s recebeu parâmetro codigo1 = %p / codigo2 = %p.\n", __FUNCTION__, codigo1, codigo2);
-    }
-
-    return NULL;
 }
+
+// codigo_t *concatena_codigo(codigo_t *codigo1, codigo_t *codigo2)
+// {
+//     if (codigo1 != NULL && codigo2 != NULL)
+//     {
+//         int novo_tamanho = codigo1->num_instrucoes + codigo2->num_instrucoes;
+//         instrucao_t **concat = (instrucao_t **)malloc(sizeof(instrucao_t *) * novo_tamanho);
+//         if (concat == NULL)
+//         {
+//             printf("Erro: %s não conseguiu alocar memória para vetor de instruções.\n", __FUNCTION__);
+//             return NULL;
+//         }
+
+//         memcpy(concat, codigo1->instrucoes, sizeof(instrucao_t *) * codigo1->num_instrucoes);
+//         memcpy(concat + codigo1->num_instrucoes, codigo2->instrucoes, sizeof(instrucao_t *) * codigo2->num_instrucoes);
+
+//         codigo1 = NULL, codigo2 = NULL;
+
+//         codigo_t *ret = NULL;
+//         ret = (codigo_t *)calloc(1, sizeof(codigo_t));
+//         if (ret == NULL)
+//         {
+//             printf("Erro: %s não conseguiu alocar memória para retorno.\n", __FUNCTION__);
+//             free(concat);
+//             return NULL;
+//         }
+//         ret->instrucoes = concat;
+//         ret->num_instrucoes = novo_tamanho;
+
+//         return ret;
+//     }
+//     else
+//     {
+//         printf("Erro: %s recebeu parâmetro codigo1 = %p / codigo2 = %p.\n", __FUNCTION__, codigo1, codigo2);
+//     }
+
+//     return NULL;
+// }
 
 instrucao_t *gera_instrucao(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int r_arg)
 {
@@ -211,14 +231,17 @@ retorno_gera_t *gera_codigo_aritmetico(char *mnem, void *nodo1, void *nodo2, voi
     asd_tree_t *nodo_asd_2 = (asd_tree_t *)nodo2;
     asd_tree_t *nodo_asd_3 = (asd_tree_t *)nodo3;
     char *local = gera_temp();
-    codigo_t *codigo = concatena_codigo(concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo), gera_codigo(mnem, nodo_asd_1->local, nodo_asd_2->local, local, ctrl, ARG_LEFT));
+    // codigo_t *codigo = concatena_codigo(concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo), gera_codigo(mnem, nodo_asd_1->local, nodo_asd_2->local, local, ctrl, ARG_LEFT));
+    concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo);
+    inserir_instrucao(nodo_asd_1->codigo, gera_instrucao(mnem, nodo_asd_1->local, nodo_asd_2->local, local, ctrl, ARG_LEFT));
+    
     retorno_gera_t *ret = (retorno_gera_t *)malloc(sizeof(retorno_gera_t));
     if (ret == NULL)
     {
         printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
         return NULL;
     }
-    ret->codigo = codigo;
+    ret->codigo = nodo_asd_1->codigo;
     ret->local = local;
 
     return ret;

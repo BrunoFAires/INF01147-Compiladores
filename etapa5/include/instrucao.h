@@ -34,7 +34,7 @@ typedef struct RetornoGera
 
 void destruir_codigo(codigo_t *codigo);
 codigo_t *gera_codigo(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int r_arg);
-codigo_t *concatena_codigo(codigo_t *codigo1, codigo_t *codigo2);
+void concatena_codigo(codigo_t *codigo1, codigo_t *codigo2);
 
 instrucao_t *gera_instrucao(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int r_arg);
 instrucao_t *gera_instrucao_label(char *lbl);
