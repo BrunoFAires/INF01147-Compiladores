@@ -18,7 +18,6 @@ typedef struct Instrucao
     char arg3[MAX_LEN];
     int ctrl;
     int r_arg;
-    //struct Instrucao *prox;
 } instrucao_t;
 
 typedef struct Codigo

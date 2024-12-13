@@ -424,28 +424,30 @@ termo:  termo '%' fator
 
 fator: '!' fator 
 { 
-    // TODO LABELS
     $$ = asd_new("!"); asd_add_child($$, $2);
+    $$->type = $2->type;
+    $$->codigo = $2->codigo;
 
     char *lbl1 = gera_rotulo();
     char *lbl2 = gera_rotulo();
     char *lbl3 = gera_rotulo();
-
-    codigo_t *codigo = concatena_codigo($2->codigo, gera_codigo(NULL, "cbr", $2->local, lbl1, lbl2, 1, 1));
-
-    instrucao_t *lbl1Codigo = gera_instrucao(lbl1, "loadI", "0", $2->local, NULL, 0, 0);
-    instrucao_t *jump = gera_instrucao(NULL, "jump", lbl3, NULL, NULL, 1, 0);
-    instrucao_t *lbl2Codigo = gera_instrucao(lbl2, "loadI", "1", $2->local, NULL, 0, 0);
-    instrucao_t *lbl3Codigo = gera_instrucao(lbl3, "nop", "", NULL, NULL, 0, 0);
     
-    inserir_instrucao(codigo, lbl1Codigo);
-    inserir_instrucao(codigo, jump);
-    inserir_instrucao(codigo, lbl2Codigo);
-    inserir_instrucao(codigo, lbl3Codigo);
+    instrucao_t *cbr_inst = gera_instrucao("cbr", $2->local, lbl1, lbl2, CTRL, ARG_RIGHT);
+    instrucao_t *lbl1_inst = gera_instrucao_label(lbl1);
+    instrucao_t *lbl1_codigo = gera_instrucao("loadI", "0", $2->local, NULL, INDIVIDUAL, ARG_LEFT);
+    instrucao_t *jump = gera_instrucao("jump", lbl3, NULL, NULL, CTRL, ARG_LEFT);
+    instrucao_t *lbl2_inst = gera_instrucao_label(lbl2);
+    instrucao_t *lbl2_codigo = gera_instrucao("loadI", "1", $2->local, NULL, INDIVIDUAL, ARG_LEFT);
+    instrucao_t *lbl3_inst = gera_instrucao_label(lbl3);
 
-    $$->codigo = codigo;
-
-    $$->type = $2->type;
+    inserir_instrucao($$->codigo, cbr_inst);
+    inserir_instrucao($$->codigo, lbl1_inst);
+    inserir_instrucao($$->codigo, lbl1_codigo);
+    inserir_instrucao($$->codigo, jump);
+    inserir_instrucao($$->codigo, lbl2_inst);
+    inserir_instrucao($$->codigo, lbl2_codigo);
+    inserir_instrucao($$->codigo, jump);
+    inserir_instrucao($$->codigo, lbl3_inst);
 }
 | '-' fator 
 { 
