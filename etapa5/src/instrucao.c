@@ -18,10 +18,10 @@ void destruir_codigo(codigo_t *codigo)
         free(codigo->instrucoes);
         free(codigo);
     }
-    // else
-    // {
-    //     printf("Erro: %s recebeu parâmetro codigo = %p.\n", __FUNCTION__, codigo);
-    // }
+    else
+    {
+        printf("Erro: %s recebeu parâmetro codigo = %p.\n", __FUNCTION__, codigo);
+    }
 }
 
 codigo_t *gera_codigo(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int r_arg)
@@ -62,44 +62,6 @@ void concatena_codigo(codigo_t *cod1, codigo_t *cod2)
     }
 }
 
-// codigo_t *concatena_codigo(codigo_t *codigo1, codigo_t *codigo2)
-// {
-//     if (codigo1 != NULL && codigo2 != NULL)
-//     {
-//         int novo_tamanho = codigo1->num_instrucoes + codigo2->num_instrucoes;
-//         instrucao_t **concat = (instrucao_t **)malloc(sizeof(instrucao_t *) * novo_tamanho);
-//         if (concat == NULL)
-//         {
-//             printf("Erro: %s não conseguiu alocar memória para vetor de instruções.\n", __FUNCTION__);
-//             return NULL;
-//         }
-
-//         memcpy(concat, codigo1->instrucoes, sizeof(instrucao_t *) * codigo1->num_instrucoes);
-//         memcpy(concat + codigo1->num_instrucoes, codigo2->instrucoes, sizeof(instrucao_t *) * codigo2->num_instrucoes);
-
-//         codigo1 = NULL, codigo2 = NULL;
-
-//         codigo_t *ret = NULL;
-//         ret = (codigo_t *)calloc(1, sizeof(codigo_t));
-//         if (ret == NULL)
-//         {
-//             printf("Erro: %s não conseguiu alocar memória para retorno.\n", __FUNCTION__);
-//             free(concat);
-//             return NULL;
-//         }
-//         ret->instrucoes = concat;
-//         ret->num_instrucoes = novo_tamanho;
-
-//         return ret;
-//     }
-//     else
-//     {
-//         printf("Erro: %s recebeu parâmetro codigo1 = %p / codigo2 = %p.\n", __FUNCTION__, codigo1, codigo2);
-//     }
-
-//     return NULL;
-// }
-
 instrucao_t *gera_instrucao(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, int r_arg)
 {
     instrucao_t *instrucao = NULL;
@@ -131,12 +93,6 @@ instrucao_t *gera_instrucao_label(char *lbl)
     instrucao = calloc(1, sizeof(instrucao_t));
     if (instrucao != NULL) {
         strncpy(instrucao->lbl, lbl, MAX_LEN);
-        // instrucao->mnem[0] = '\0';
-        // instrucao->arg1[0] = '\0';
-        // instrucao->arg2[0] = '\0';
-        // instrucao->arg3[0] = '\0';
-        // instrucao->ctrl = INDIVIDUAL;
-        // instrucao->ctrl = ARG_LEFT;
     } else {
         printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
     }
@@ -173,9 +129,6 @@ void exporta_codigo(codigo_t *codigo)
         for (int i = 0; i < codigo->num_instrucoes; i++) {
             exporta_instrucao(codigo->instrucoes[i]);
         }
-    }
-    else {
-        printf("Erro: %s recebeu parâmetro codigo = %p.\n", __FUNCTION__, codigo);
     }
 }
 
@@ -231,7 +184,6 @@ retorno_gera_t *gera_codigo_aritmetico(char *mnem, void *nodo1, void *nodo2, voi
     asd_tree_t *nodo_asd_2 = (asd_tree_t *)nodo2;
     asd_tree_t *nodo_asd_3 = (asd_tree_t *)nodo3;
     char *local = gera_temp();
-    // codigo_t *codigo = concatena_codigo(concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo), gera_codigo(mnem, nodo_asd_1->local, nodo_asd_2->local, local, ctrl, ARG_LEFT));
     concatena_codigo(nodo_asd_1->codigo, nodo_asd_2->codigo);
     inserir_instrucao(nodo_asd_1->codigo, gera_instrucao(mnem, nodo_asd_1->local, nodo_asd_2->local, local, ctrl, ARG_LEFT));
     

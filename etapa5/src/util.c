@@ -141,7 +141,7 @@ char *_gera_string(char identificador, int *num)
         printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
         return NULL;
     }
-    sprintf(resultado, "%c%d", identificador, *num);
+    snprintf(resultado, tamanho, "%c%d", identificador, *num);
 
     return resultado;
 }
@@ -169,66 +169,6 @@ void libera_se_alocado(void *ponteiro)
     }
 }
 
-void reverse(char* str) {
-    char* start = str;
-    char* end = str;
-
-    while (*end != '\0') {
-        end++;
-    }
-    end--;
-
-    while (start < end) {
-        char temp = *start;
-        *start = *end;
-        *end = temp;
-        start++;
-        end--;
-    }
-}
-
-// char* itoa(int num) {
-//     int isNegative = 0;
-//     int temp = num;
-//     int length = 0;
-
-//     if (num == 0) {
-//         char* result = (char*)malloc(2 * sizeof(char));
-//         if (result == NULL) return NULL;
-//         result[0] = '0';
-//         result[1] = '\0';
-//         return result;
-//     }
-
-//     if (num < 0) {
-//         isNegative = 1;
-//         num = -num;
-//     }
-
-//     while (temp != 0) {
-//         temp /= 10;
-//         length++;
-//     }
-//     length += isNegative;
-
-//     char* result = (char*)malloc((length + 1) * sizeof(char));
-//     if (result == NULL) return NULL;                     
-
-//     char* ptr = result;
-//     do {
-//         *ptr++ = (num % 10) + '0'; 
-//         num /= 10;
-//     } while (num != 0);
-
-//     if (isNegative) {
-//         *ptr++ = '-';
-//     }
-
-//     *ptr = '\0';
-//     reverse(result);
-//     return result;
-// }
-
 char *itoa(int num) 
 {
     char *str = (char *) malloc(MAX_ITOA * sizeof(char));
@@ -236,6 +176,6 @@ char *itoa(int num)
         printf("Erro: %s não conseguiu alocar memória.\n", __FUNCTION__);
         return NULL;
     }
-    sprintf(str, "%d", num);
+    snprintf(str, MAX_ITOA, "%d", num);
     return str;
 }

@@ -102,22 +102,44 @@ programa: listaDeFuncao { $$ = $1; arvore = $$; }
 | /* vazio */ { $$ = NULL; arvore = $$; }
 ;
 
-listaDeFuncao: funcaoComParametros fechaEscopo listaDeFuncao { $$ = $1; asd_add_child($$, $3); }
-|  funcaoSemParametros fechaEscopo listaDeFuncao { $$ = $1; asd_add_child($$, $3); }
+listaDeFuncao: funcaoComParametros fechaEscopo listaDeFuncao 
+{ 
+    $$ = $1; 
+    asd_add_child($$, $3); 
+    if ($$->codigo != NULL) {
+        concatena_codigo($$->codigo, $3->codigo);
+    }
+}
+|  funcaoSemParametros fechaEscopo listaDeFuncao 
+{ 
+    $$ = $1; 
+    asd_add_child($$, $3);
+    if ($$->codigo != NULL) {
+        concatena_codigo($$->codigo, $3->codigo);
+    }
+}
 |  funcaoComParametros fechaEscopo { $$ = $1; }
 |  funcaoSemParametros fechaEscopo { $$ = $1; }
 ;
 
 funcaoComParametros: TK_IDENTIFICADOR '=' abreEscopoFuncao parametrosFuncao '>' tipo { inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $6->type, $1->value)); } blocoComandoFuncao
 { 
-    $$ = asd_new($1->value); if($8 != NULL) asd_add_child($$, $8);
+    $$ = asd_new($1->value); 
+    if($8 != NULL) {
+        $$->codigo = $8->codigo;
+        asd_add_child($$, $8);
+    }
     lex_value_free($1);
     asd_free($6);
 };
 
 funcaoSemParametros: TK_IDENTIFICADOR '=' abreEscopoFuncao '>' tipo { inserir_entrada(pilha->proximo->tabela, criar_entrada($1->lineno, NAT_FUNCAO, $5->type, $1->value)); } blocoComandoFuncao
 { 
-    $$ = asd_new($1->value); if($7 != NULL) asd_add_child($$, $7);
+    $$ = asd_new($1->value); 
+    if($7 != NULL) {
+        $$->codigo = $7->codigo;
+        asd_add_child($$, $7);
+    }
     lex_value_free($1);
     asd_free($5);
 };
@@ -165,17 +187,30 @@ listaDeComandoSimples: comandosSimples';' listaDeComandoSimples
 {
     $$ = $1; 
     if ($$ != NULL) { 
-        if($3 != NULL) 
+        if($3 != NULL) {
+            concatena_codigo($$->codigo, $3->codigo);
             asd_add_child($$, $3); 
-    } else $$ = $3;
+        }
+    } else {
+        $$ = $3;
+    }
 }
 | var';' listaDeComandoSimples
 {
     $$ = $1; 
     if ($$ != NULL) { 
-        if($3 != NULL) 
-            asd_add_child(asd_get_last_node($$, MIN_NUM_CHILDREN_VAR), $3); 
-    } else $$ = $3;
+        if($3 != NULL) {
+            asd_tree_t *last_node = asd_get_last_node($$, MIN_NUM_CHILDREN_VAR);
+            asd_add_child(last_node, $3); 
+            if (last_node->codigo != NULL) {
+                concatena_codigo(last_node->codigo, $3->codigo);
+            } else {
+                $$->codigo = $3->codigo;
+            }
+        }
+    } else {
+        $$ = $3;
+    }
 }
 | comandosSimples';'
 {
@@ -218,8 +253,9 @@ listaVar: TK_IDENTIFICADOR
     $$ = asd_new("<="); 
     asd_add_child($$, asd_new($1->value)); 
     asd_add_child($$, asd_new($3->value)); 
-    if($5 != NULL)
+    if($5 != NULL) {
         asd_add_child($$, $5);
+    }
     lex_value_free($1);
     lex_value_free($3);
 }
@@ -271,7 +307,6 @@ retorno: TK_PR_RETURN expressao
     $$ = asd_new("return"); asd_add_child($$, $2);
 };
 
-// TODO GEN
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
 {
     $$ = asd_new("if"); 
@@ -315,7 +350,6 @@ condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
 }
 ;
 
-// TODO GEN
 repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
 {
     $$ = asd_new("while"); 
