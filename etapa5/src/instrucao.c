@@ -42,6 +42,15 @@ codigo_t *gera_codigo(char *mnem, char *arg1, char *arg2, char *arg3, int ctrl, 
     return ret;
 }
 
+codigo_t *gera_codigo_label(char *lbl)
+{
+    instrucao_t *inst_label = gera_instrucao_label(lbl);
+    codigo_t *ret = gera_codigo(inst_label->mnem, inst_label->arg1, inst_label->arg2, inst_label->arg3, inst_label->ctrl, inst_label->r_arg);
+    strncpy(ret->instrucoes[0]->lbl, inst_label->lbl, MAX_LEN);
+
+    return ret;
+}
+
 void concatena_codigo(codigo_t *cod1, codigo_t *cod2)
 {
     // Concatena código de cod2 em cod1
