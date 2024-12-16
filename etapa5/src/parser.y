@@ -93,8 +93,12 @@ abreEscopoFuncao: /* vazio */
 abreEscopoInterno: /* vazio */ 
 {
     tabela_t *tabela = criar_tabela_vazia();
-    tabela->inicio_deslocamento = pilha->tabela->entradas[pilha->tabela->num_entradas-1]->deslocamento + TAM_ENTRADA;
+
+   if(pilha->tabela->entradas != NULL){
+     tabela->inicio_deslocamento = pilha->tabela->entradas[pilha->tabela->num_entradas-1]->deslocamento;
+   }
     empilhar(&pilha, tabela);
+
 }
 fechaEscopo: /* vazio */ { desempilhar(&pilha); }
  
