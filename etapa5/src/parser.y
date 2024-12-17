@@ -99,7 +99,12 @@ abreEscopoInterno: /* vazio */
 }
 fechaEscopo: /* vazio */ { desempilhar(&pilha); }
  
-programa: listaDeFuncao { $$ = $1; arvore = $$; }
+programa: listaDeFuncao { 
+    $$ = $1; arvore = $$;
+    codigo_t *init_rfp = gera_codigo("loadI", "0", "rfp", NULL, INDIVIDUAL, ARG_LEFT);
+    concatena_codigo(init_rfp, $$->codigo);
+    $$->codigo = init_rfp;
+ }
 | /* vazio */ { $$ = NULL; arvore = $$; }
 ;
 
@@ -273,7 +278,7 @@ atribuicao: TK_IDENTIFICADOR '=' expressao
     $$->codigo = $3->codigo;
     char *local = gera_temp();
     inserir_instrucao($$->codigo, gera_instrucao("loadI", itoa(entrada->deslocamento), local, NULL, INDIVIDUAL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao("store", $3->local, local, NULL, INDIVIDUAL, ARG_LEFT));
+    inserir_instrucao($$->codigo, gera_instrucao("storeAO", $3->local, local, "rfp", INDIVIDUAL, ARG_RIGHT));
     
     lex_value_free($1);
 };
