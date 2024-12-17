@@ -8,6 +8,7 @@
 #define INDIVIDUAL 0
 #define ARG_RIGHT 1
 #define ARG_LEFT 0
+#define RFP_START "1024"
 
 typedef struct Instrucao
 {

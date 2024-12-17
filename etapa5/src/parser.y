@@ -101,7 +101,7 @@ fechaEscopo: /* vazio */ { desempilhar(&pilha); }
  
 programa: listaDeFuncao { 
     $$ = $1; arvore = $$;
-    codigo_t *init_rfp = gera_codigo("loadI", "0", "rfp", NULL, INDIVIDUAL, ARG_LEFT);
+    codigo_t *init_rfp = gera_codigo("loadI", RFP_START, "rfp", NULL, INDIVIDUAL, ARG_LEFT);
     concatena_codigo(init_rfp, $$->codigo);
     $$->codigo = init_rfp;
  }
@@ -276,9 +276,7 @@ atribuicao: TK_IDENTIFICADOR '=' expressao
     $$->type = entrada->tipo_simbolo;
 
     $$->codigo = $3->codigo;
-    char *local = gera_temp();
-    inserir_instrucao($$->codigo, gera_instrucao("loadI", itoa(entrada->deslocamento), local, NULL, INDIVIDUAL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao("storeAO", $3->local, local, "rfp", INDIVIDUAL, ARG_RIGHT));
+    inserir_instrucao($$->codigo, gera_instrucao("storeAI", $3->local, "rfp", itoa(entrada->deslocamento), INDIVIDUAL, ARG_RIGHT));
     
     lex_value_free($1);
 };
@@ -509,12 +507,8 @@ fator: '!' fator
     entrada_t *entrada = buscar(pilha, $1->value);
     $$ = asd_new($1->value); 
     $$->type = entrada->tipo_simbolo;
-    $$->local = gera_temp();
-
-    char *local = gera_temp();
-    codigo_t *codigo = gera_codigo("loadI", itoa(entrada->deslocamento), local, NULL, INDIVIDUAL, ARG_LEFT); // Assumindo que deslocamento sempre será
-    inserir_instrucao(codigo, gera_instrucao("load", local, $$->local, NULL, INDIVIDUAL, ARG_LEFT));         // sobre rfp
-    $$->codigo = codigo;
+    $$->local = gera_temp();     
+    $$->codigo = gera_codigo("loadAI", "rfp", itoa(entrada->deslocamento), $$->local, INDIVIDUAL, ARG_LEFT);
 
     lex_value_free($1);
 }
