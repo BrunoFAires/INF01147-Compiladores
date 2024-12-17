@@ -93,10 +93,7 @@ abreEscopoFuncao: /* vazio */
 abreEscopoInterno: /* vazio */ 
 {
     tabela_t *tabela = criar_tabela_vazia();
-
-   if(pilha->tabela->entradas != NULL){
-     tabela->inicio_deslocamento = pilha->tabela->entradas[pilha->tabela->num_entradas-1]->deslocamento;
-   }
+    tabela->inicio_deslocamento = buscar_ultimo_deslocamento(pilha) + TAM_ENTRADA;
     empilhar(&pilha, tabela);
 
 }
@@ -312,21 +309,9 @@ condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
     if ($7 != NULL) asd_add_child($$, $7);
 
     $$->codigo = $3->codigo;
-    char *lbl1 = gera_rotulo();
-    char *lbl2 = gera_rotulo();
-    char *lbl3 = gera_rotulo();
-    inserir_instrucao($$->codigo, gera_instrucao("cbr", $3->local, lbl1, lbl2, CTRL, ARG_RIGHT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl1));
-    if ($5 != NULL) {
-        concatena_codigo($$->codigo, $5->codigo);
-    }
-    inserir_instrucao($$->codigo, gera_instrucao("jumpI", lbl3, NULL, NULL, CTRL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl2));
-    if ($7 != NULL) {
-        concatena_codigo($$->codigo, $7->codigo);
-    }
-    inserir_instrucao($$->codigo, gera_instrucao("jumpI", lbl3, NULL, NULL, CTRL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl3));
+    codigo_t *cod_true = $5 != NULL ? $5->codigo : NULL;
+    codigo_t *cod_false = $7 != NULL ? $7->codigo : NULL;
+    gera_codigo_fluxo_de_controle($$, $3->local, NULL, cod_true, cod_false);
 }
 | TK_PR_IF '(' expressao ')' blocoComando
 {
@@ -335,15 +320,8 @@ condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando
     if ($5 != NULL) asd_add_child($$, $5);
 
     $$->codigo = $3->codigo;
-    char *lbl1 = gera_rotulo();
-    char *lbl2 = gera_rotulo();
-    inserir_instrucao($$->codigo, gera_instrucao("cbr", $3->local, lbl1, lbl2, CTRL, ARG_RIGHT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl1));
-    if ($5 != NULL) {
-        concatena_codigo($$->codigo, $5->codigo);
-    }
-    inserir_instrucao($$->codigo, gera_instrucao("jumpI", lbl2, NULL, NULL, CTRL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl2));
+    codigo_t *cod_true = $5 != NULL ? $5->codigo : NULL;
+    gera_codigo_fluxo_de_controle($$, $3->local, NULL, cod_true, NULL);
 }
 ;
 
@@ -353,18 +331,11 @@ repeticao: TK_PR_WHILE '(' expressao ')' blocoComando
     asd_add_child($$, $3); 
     if ($5 != NULL) asd_add_child($$, $5);
 
-    char *lbl1 = gera_rotulo();
-    char *lbl2 = gera_rotulo();
-    char *lbl3 = gera_rotulo();
-    $$->codigo = gera_codigo_label(lbl1);
+    char *label_inicio = gera_rotulo();
+    $$->codigo = gera_codigo_label(label_inicio);
     concatena_codigo($$->codigo, $3->codigo);
-    inserir_instrucao($$->codigo, gera_instrucao("cbr", $3->local, lbl2, lbl3, CTRL, ARG_RIGHT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl2));
-    if ($5 != NULL) {
-        concatena_codigo($$->codigo, $5->codigo);
-    }
-    inserir_instrucao($$->codigo, gera_instrucao("jumpI", lbl1, NULL, NULL, CTRL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl3));
+    codigo_t *cod_true = $5 != NULL ? $5->codigo : NULL;
+    gera_codigo_fluxo_de_controle($$, $3->local, label_inicio, cod_true, NULL);
 };
 
 expressao: expressao TK_OC_OR exp1 
@@ -510,18 +481,9 @@ fator: '!' fator
     $$->codigo = $2->codigo;
     $$->local = gera_temp();
 
-    char *lbl1 = gera_rotulo();
-    char *lbl2 = gera_rotulo();
-    char *lbl3 = gera_rotulo();
-
-    inserir_instrucao($$->codigo, gera_instrucao("cbr", $2->local, lbl1, lbl2, CTRL, ARG_RIGHT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl1));
-    inserir_instrucao($$->codigo, gera_instrucao("loadI", "0", $$->local, NULL, INDIVIDUAL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao("jumpI", lbl3, NULL, NULL, CTRL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl2));
-    inserir_instrucao($$->codigo, gera_instrucao("loadI", "1", $$->local, NULL, INDIVIDUAL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao("jumpI", lbl3, NULL, NULL, CTRL, ARG_LEFT));
-    inserir_instrucao($$->codigo, gera_instrucao_label(lbl3));
+    codigo_t *cod_true = gera_codigo("loadI", "0", $$->local, NULL, INDIVIDUAL, ARG_LEFT);
+    codigo_t *cod_false = gera_codigo("loadI", "1", $$->local, NULL, INDIVIDUAL, ARG_LEFT);
+    gera_codigo_fluxo_de_controle($$, $2->local, NULL, cod_true, cod_false);
 }
 | '-' fator 
 { 

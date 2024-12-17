@@ -207,3 +207,20 @@ retorno_gera_t *gera_codigo_aritmetico(char *mnem, void *nodo1, void *nodo2, voi
 
     return ret;
 }
+
+void gera_codigo_fluxo_de_controle(void *nodo, char *condicional, char *label_inicio, codigo_t *cod_true, codigo_t *cod_false)
+{
+    asd_tree_t *nodo_asd = (asd_tree_t *)nodo;
+    char *lbl1 = gera_rotulo();
+    char *lbl2 = gera_rotulo();
+    char *lbl3 = gera_rotulo();
+
+    inserir_instrucao(nodo_asd->codigo, gera_instrucao("cbr", condicional, lbl1, lbl2, CTRL, ARG_RIGHT));
+    inserir_instrucao(nodo_asd->codigo, gera_instrucao_label(lbl1));
+    concatena_codigo(nodo_asd->codigo, cod_true);
+    inserir_instrucao(nodo_asd->codigo, gera_instrucao("jumpI", label_inicio == NULL ? lbl3 : label_inicio, NULL, NULL, CTRL, ARG_LEFT));
+    inserir_instrucao(nodo_asd->codigo, gera_instrucao_label(lbl2));
+    concatena_codigo(nodo_asd->codigo, cod_false);
+    inserir_instrucao(nodo_asd->codigo, gera_instrucao("jumpI", lbl3, NULL, NULL, CTRL, ARG_LEFT));
+    inserir_instrucao(nodo_asd->codigo, gera_instrucao_label(lbl3));
+}

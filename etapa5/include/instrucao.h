@@ -47,5 +47,6 @@ void exporta_instrucao(instrucao_t *inst);
 void exporta_codigo(codigo_t *codigo);
 
 retorno_gera_t *gera_codigo_aritmetico(char *mnem, void *nodo1, void *nodo2, void *nodo3, int ctrl);
+void gera_codigo_fluxo_de_controle(void *nodo, char *condicional, char *label_inicio, codigo_t *cod_true, codigo_t *cod_false);
 
 #endif

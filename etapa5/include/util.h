@@ -21,5 +21,6 @@ char *gera_temp();
 char *gera_rotulo();
 void libera_se_alocado(void *ponteiro);
 char* itoa(int num);
+int buscar_ultimo_deslocamento(pilha_t *topo);
 
 #endif //_UTIL_H_

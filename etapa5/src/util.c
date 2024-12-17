@@ -42,14 +42,6 @@ void exporta(void *arvore)
         exporta(tree->children[i]);
     }
 
-    // Libera memória ao final da exportação
-    // free(tree->children);
-    // tree->children = NULL;
-    // free(tree->label);
-    // tree->label = NULL;
-    // free(tree);
-    // tree = NULL;
-
     return;
 }
 
@@ -178,4 +170,19 @@ char *itoa(int num)
     }
     snprintf(str, MAX_ITOA, "%d", num);
     return str;
+}
+
+int buscar_ultimo_deslocamento(pilha_t *topo)
+{
+    if (topo != NULL) {
+        pilha_t *aux = topo;
+        while (aux->proximo != NULL) {
+            if (aux->tabela->entradas != NULL) {
+                return aux->tabela->entradas[aux->tabela->num_entradas-1]->deslocamento;
+            }
+            aux = aux->proximo;
+        }
+    }
+
+    return 0;
 }
