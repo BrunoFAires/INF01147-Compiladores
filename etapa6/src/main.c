@@ -2,6 +2,7 @@
 #include "instrucao.h"
 #include "pilha.h"
 #include "macros.h"
+#include "assembly_gen.h"
 #include <stdio.h>
 
 extern int yyparse(void);
@@ -15,6 +16,7 @@ int main(int argc, char **argv)
   if (arvore != NULL) {
     if (arvore->codigo != NULL) {
       exporta_codigo(arvore->codigo);
+      generate_asm(arvore->codigo);
       destruir_codigo(arvore->codigo);
     }
     asd_free(arvore);
