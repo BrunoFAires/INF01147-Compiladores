@@ -82,7 +82,7 @@ abreEscopoGlobal: /* vazio */
     tabela_t *tabela_g = criar_tabela_vazia(); 
     pilha = criar_pilha(tabela_g);  
 }
-fechaEscopoGlobal: /* vazio */ { destruir_pilha(pilha); }
+fechaEscopoGlobal: /* vazio */ { /* destruir_pilha(pilha); */ }
 
 abreEscopoFuncao: /* vazio */ 
 {

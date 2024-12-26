@@ -22,7 +22,7 @@ run: etapa6
 	./etapa6
 
 # Bison
-B_DEPS = $(SDIR)/parser.y $(SDIR)/util.c $(IDIR)/util.h $(SDIR)/asd.c $(IDIR)/asd.h $(SDIR)/lex_value.c $(IDIR)/lex_value.h $(SDIR)/pilha.c $(IDIR)/pilha.h $(SDIR)/tabela.c $(IDIR)/tabela.h $(IDIR)/macros.h $(SDIR)/instrucao.c $(IDIR)/instrucao.h $(SDIR)/assembly_gen.c $(IDIR)/assembly_gen.h
+B_DEPS = $(SDIR)/parser.y $(SDIR)/util.c $(IDIR)/util.h $(SDIR)/asd.c $(IDIR)/asd.h $(SDIR)/lex_value.c $(IDIR)/lex_value.h $(SDIR)/pilha.c $(IDIR)/pilha.h $(SDIR)/tabela.c $(IDIR)/tabela.h $(IDIR)/macros.h $(SDIR)/instrucao.c $(IDIR)/instrucao.h # $(SDIR)/assembly_gen.c $(IDIR)/assembly_gen.h
  $(IDIR)/parser.tab.h: $(B_DEPS) | dirs
 	bison -d -v -o $(SDIR)/parser.tab.c $< 
 	mv $(SDIR)/parser.tab.h $(IDIR)

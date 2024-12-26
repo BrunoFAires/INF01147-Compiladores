@@ -146,6 +146,8 @@ void exporta_instrucao(instrucao_t *inst)
     if (inst->lbl[0] != '\0') {
         fprintf(stdout, "%s:\n", inst->lbl);
         return;
+    } else if (strcmp(inst->mnem, "ret") == 0) { // ignora ret, que só é usado para geração do assembly
+        return;
     }
 
     fprintf(stdout, "%-*s ", LARG_MNEM, inst->mnem);

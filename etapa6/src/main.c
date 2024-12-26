@@ -15,12 +15,15 @@ int main(int argc, char **argv)
   int ret = yyparse();
   if (arvore != NULL) {
     if (arvore->codigo != NULL) {
-      exporta_codigo(arvore->codigo);
-      generate_asm(arvore->codigo);
+      //exporta_codigo(arvore->codigo);
+      generate_asm(arvore->codigo, pilha);
       destruir_codigo(arvore->codigo);
     }
     asd_free(arvore);
-  }  
+  }
+  if (pilha != NULL) {
+    destruir_pilha(pilha);
+  }
   yylex_destroy();
   
   return ret;
