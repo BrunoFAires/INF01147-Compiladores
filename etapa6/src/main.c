@@ -15,7 +15,7 @@ int main(int argc, char **argv)
   int ret = yyparse();
   if (arvore != NULL) {
     if (arvore->codigo != NULL) {
-      //exporta_codigo(arvore->codigo);
+      // exporta_codigo(arvore->codigo);
       generate_asm(arvore->codigo, pilha);
       destruir_codigo(arvore->codigo);
     }
