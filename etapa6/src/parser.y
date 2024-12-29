@@ -303,7 +303,8 @@ retorno: TK_PR_RETURN expressao
 {
     $$ = asd_new("return"); asd_add_child($$, $2);
     // Usado apenas para geração do código assembly
-    $$->codigo = gera_codigo("ret", $2->local, NULL, NULL, INDIVIDUAL, ARG_LEFT);
+    $$->codigo = $2->codigo;
+    inserir_instrucao($$->codigo, gera_instrucao("ret", $2->local, NULL, NULL, INDIVIDUAL, ARG_LEFT));
 };
 
 condicional: TK_PR_IF '(' expressao ')' blocoComando TK_PR_ELSE blocoComando

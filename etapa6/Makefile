@@ -6,10 +6,10 @@ SDIR = src
 LOGDIR = logs
 LIBS = -lfl
 
-_DEPS = util.h parser.tab.h asd.h lex_value.h pilha.h tabela.h macros.h instrucao.h assembly_gen.h
+_DEPS = util.h parser.tab.h asd.h lex_value.h pilha.h tabela.h macros.h instrucao.h assembly_gen.h registradores.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o util.o lex.yy.o parser.tab.o asd.o lex_value.o pilha.o tabela.o instrucao.o assembly_gen.o
+_OBJ = main.o util.o lex.yy.o parser.tab.o asd.o lex_value.o pilha.o tabela.o instrucao.o assembly_gen.o # registradores.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .PHONY: dirs clean run
