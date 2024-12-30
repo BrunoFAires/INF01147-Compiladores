@@ -63,6 +63,7 @@ etapa[1-7]/etapa[1-7]
 **/*.xopp
 **/tests/*
 saida*
+run_e6.sh
 
 # VS Code
 **/.vscode/*

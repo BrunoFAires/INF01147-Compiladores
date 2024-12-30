@@ -33,6 +33,8 @@ void generate_asm(codigo_t *codigo, pilha_t *pilha)
             fprintf(stdout, "%s:\n", instrucao->lbl);
         } else if (strcmp(instrucao->mnem, "ret") == 0) { // return
             fprintf(stdout, "movq %%%s, %%rax\n", mapeia_registradores(instrucao->arg1));
+            fprintf(stdout, "popq %%rbp\n");
+            fprintf(stdout, "ret\n");
         } else if (strcmp(instrucao->mnem, "loadI") == 0) {
             fprintf(stdout, "movq $%s, %%%s\n", instrucao->arg1, mapeia_registradores(instrucao->arg2));
         } else if (strcmp(instrucao->mnem, "storeAI") == 0) {
@@ -40,9 +42,9 @@ void generate_asm(codigo_t *codigo, pilha_t *pilha)
             int deslocamento = calculate_offset_asm(atoi(instrucao->arg3));
             fprintf(stdout, "movq %%%s, -%d(%%rbp)\n", mapeia_registradores(instrucao->arg1), deslocamento);
         } else if (strcmp(instrucao->mnem, "or") == 0) {
-            generate_arithm_logic_asm("or", instrucao, REGISTRADOR);
+            generate_arithm_logic_asm("orq", instrucao, REGISTRADOR);
         } else if (strcmp(instrucao->mnem, "and") == 0) {
-            generate_arithm_logic_asm("and", instrucao, REGISTRADOR);
+            generate_arithm_logic_asm("andq", instrucao, REGISTRADOR); 
         } else if (strcmp(instrucao->mnem, "cmp_NE") == 0) {
             generate_comparison_asm("ne", instrucao);
         } else if (strcmp(instrucao->mnem, "cmp_EQ") == 0) {
@@ -56,17 +58,18 @@ void generate_asm(codigo_t *codigo, pilha_t *pilha)
         } else if (strcmp(instrucao->mnem, "cmp_LT") == 0) {
             generate_comparison_asm("l", instrucao);
         } else if (strcmp(instrucao->mnem, "sub") == 0) {
-            generate_arithm_logic_asm("sub", instrucao, REGISTRADOR);
+            generate_arithm_logic_asm("subq", instrucao, REGISTRADOR);
         } else if (strcmp(instrucao->mnem, "add") == 0) {
-            generate_arithm_logic_asm("add", instrucao, REGISTRADOR);
+            generate_arithm_logic_asm("addq", instrucao, REGISTRADOR);
         } else if (strcmp(instrucao->mnem, "div") == 0) {
+            fprintf(stdout, "xorq %%rdx, %%rdx\n");                                          // rdx = 0
             fprintf(stdout, "movq %%%s, %%rax\n", mapeia_registradores(instrucao->arg1));    // rax = r1 
             fprintf(stdout, "div %%%s\n", mapeia_registradores(instrucao->arg2));            // rax = rax / r2, rdx = rax % r2
             fprintf(stdout, "movq %%rax, %%%s\n", mapeia_registradores(instrucao->arg3));    // r3 = quociente
         } else if (strcmp(instrucao->mnem, "mult") == 0) {
-            generate_arithm_logic_asm("imul", instrucao, REGISTRADOR);
+            generate_arithm_logic_asm("imulq", instrucao, REGISTRADOR);
         } else if (strcmp(instrucao->mnem, "multI") == 0) {
-            generate_arithm_logic_asm("imul", instrucao, IMEDIATO);
+            generate_arithm_logic_asm("imulq", instrucao, IMEDIATO);
         } else if (strcmp(instrucao->mnem, "loadAI") == 0) {
             // arg2 é o deslocamento aqui!!
             int deslocamento = calculate_offset_asm(atoi(instrucao->arg2));
@@ -81,9 +84,6 @@ void generate_asm(codigo_t *codigo, pilha_t *pilha)
             fprintf(stderr, "Erro: instrução ILOC (%s) a ser traduzida não reconhecida.", instrucao->mnem);
         }
     }
-
-    fprintf(stdout, "popq %%rbp\n");
-    fprintf(stdout, "ret\n");
     
     return;
 }
@@ -92,8 +92,8 @@ void generate_arithm_logic_asm(char *mnem_asm, instrucao_t *inst, int tipo)
 {
     if (tipo == REGISTRADOR) {
         const char *arg1 = mapeia_registradores(inst->arg1), *arg2 = mapeia_registradores(inst->arg2), *arg3 = mapeia_registradores(inst->arg3);
-        fprintf(stdout, "%s %%%s, %%%s\n", mnem_asm, arg1, arg2);
-        fprintf(stdout, "movq %%%s, %%%s\n", arg2, arg3); 
+        fprintf(stdout, "%s %%%s, %%%s\n", mnem_asm, arg2, arg1);
+        fprintf(stdout, "movq %%%s, %%%s\n", arg1, arg3); 
     } else if (tipo == IMEDIATO) {
         const char *arg1 = mapeia_registradores(inst->arg1), *arg3 = mapeia_registradores(inst->arg3);
         fprintf(stdout, "%s $%s, %%%s\n", mnem_asm, inst->arg2, arg1);
@@ -106,7 +106,7 @@ void generate_arithm_logic_asm(char *mnem_asm, instrucao_t *inst, int tipo)
 void generate_comparison_asm(char *setx, instrucao_t *inst)
 {
     const char *arg1 = mapeia_registradores(inst->arg1), *arg2 = mapeia_registradores(inst->arg2), *arg3 = mapeia_registradores(inst->arg3);
-    fprintf(stdout, "cmpl %%%s, %%%s\n", arg2, arg1);
+    fprintf(stdout, "cmpq %%%s, %%%s\n", arg2, arg1);
     fprintf(stdout, "set%s %%al\n", setx);
     fprintf(stdout, "movzx %%al, %%%s\n", arg3);
 }
