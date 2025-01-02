@@ -23,6 +23,7 @@ void generate_asm(codigo_t *codigo, pilha_t *pilha)
     fprintf(stdout, "pushq %%rbp\n");
     fprintf(stdout, "movq %%rsp, %%rbp\n");
 
+    // TODO: check q in airthm and logic instructions and three operand instructions
     for (int i = 1; i < codigo->num_instrucoes; i++) { // pula primeira instrução (define rfp)
         if (codigo->instrucoes[i] == NULL) {
             printf("Erro: %s recebeu parâmetro codigo->instrucoes[%d] = %p.\n", __FUNCTION__, i, codigo->instrucoes[i]);
@@ -92,12 +93,14 @@ void generate_arithm_logic_asm(char *mnem_asm, instrucao_t *inst, int tipo)
 {
     if (tipo == REGISTRADOR) {
         const char *arg1 = mapeia_registradores(inst->arg1), *arg2 = mapeia_registradores(inst->arg2), *arg3 = mapeia_registradores(inst->arg3);
-        fprintf(stdout, "%s %%%s, %%%s\n", mnem_asm, arg2, arg1);
-        fprintf(stdout, "movq %%%s, %%%s\n", arg1, arg3); 
+        fprintf(stdout, "%s %%%s, %%%s, %%%s\n", mnem_asm, arg3, arg2, arg1);
+        // fprintf(stdout, "%s %%%s, %%%s\n", mnem_asm, arg2, arg1);
+        // fprintf(stdout, "movq %%%s, %%%s\n", arg1, arg3); 
     } else if (tipo == IMEDIATO) {
         const char *arg1 = mapeia_registradores(inst->arg1), *arg3 = mapeia_registradores(inst->arg3);
-        fprintf(stdout, "%s $%s, %%%s\n", mnem_asm, inst->arg2, arg1);
-        fprintf(stdout, "movq %%%s, %%%s\n", arg1, arg3); 
+        fprintf(stdout, "%s %%%s, $%s, %%%s\n", mnem_asm, arg3, inst->arg2, arg1);
+        // fprintf(stdout, "%s $%s, %%%s\n", mnem_asm, inst->arg2, arg1);
+        // fprintf(stdout, "movq %%%s, %%%s\n", arg1, arg3); 
     } else {
         fprintf(stderr, "Erro: %s recebeu parâmetro tipo = %d.\n", __FUNCTION__, tipo);
     }
