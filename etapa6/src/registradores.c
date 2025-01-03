@@ -8,7 +8,7 @@
     de grafos para fazer alocação de registradores. Então, desde já, pedimos desculpas por isso :/
 */
 
-const char *REGISTRADORES[] = {"r8", "r9", "r10", "r11"}; // "rsi", "rdi", 
+const char *REGISTRADORES[] = {"r8", "r9", "r10", "r11", "rsi", "rdi", "rcx", "rbx"}; 
 const char *mapeia_registradores(char *reg)
 { 
     int num_reg = get_num_reg(reg); 

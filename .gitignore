@@ -64,6 +64,7 @@ etapa[1-7]/etapa[1-7]
 **/tests/*
 saida*
 run_e6.sh
+run_tests_e6.py
 
 # VS Code
 **/.vscode/*
